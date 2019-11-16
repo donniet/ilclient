@@ -76,7 +76,7 @@ func (s State) String() string {
 	case C.OMX_StateWaitForResources:
 		return "OMX_StateWaitForResources"
 	}
-	return fmt.Sprintf("UNKONWN %v", s)
+	return fmt.Sprintf("UNKONWN %v", int(s))
 }
 
 type TunnelError int
@@ -108,7 +108,7 @@ func (e TunnelError) String() string {
 	case TunnelErrorNoEnable:
 		return "TunnelErrorNoEnable"
 	}
-	return fmt.Sprintf("UNKONWN %x", e)
+	return fmt.Sprintf("UNKONWN %x", int(e))
 }
 func (e TunnelError) Error() string {
 	return e.String()
@@ -209,7 +209,7 @@ func (e Error) String() string {
 	case C.OMX_ErrorDrmGeneral:
 		return "OMX_ErrorDrmGeneral"
 	}
-	return fmt.Sprintf("UNKNOWN %x", e)
+	return fmt.Sprintf("UNKNOWN %x", int(e))
 }
 
 type CreateFlag C.ILCLIENT_CREATE_FLAGS_T
@@ -238,5 +238,5 @@ func (f CreateFlag) String() string {
 	case CreateFlagOutputZeroBuffers:
 		return "CreateFlagOutputZeroBuffers"
 	}
-	return fmt.Sprintf("UNKNOWN: %d", f)
+	return fmt.Sprintf("UNKNOWN: %x", int(f))
 }
