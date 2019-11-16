@@ -2,7 +2,7 @@ package ilclient
 
 /*
 #cgo CFLAGS: -Wno-unused-variable -Wall -Wno-deprecated -g -DRASPBERRY_PI -DSTANDALONE -D__STDC_CONSTANT_MACROS  -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -I/opt/vc/include/IL -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux/ -I/opt/vc/src/hello_pi/libs/ilclient
-#cgo LDFLAGS: -L /opt/vc/lib -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -L/opt/vc/src/hello_pi/libs/ilclient -lilclient -rdynamic -Wl,-rpath-link,/opt/vc/lib
+#cgo LDFLAGS: -L /opt/vc/lib -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -L/opt/vc/src/hello_pi/libs/ilclient -lilclient -Wl,-rpath-link,/opt/vc/lib
 
 #include <OMX_Core.h>
 #include <OMX_Component.h>
@@ -190,6 +190,31 @@ func (c *Client) handleFillBuffer(comp *C.COMPONENT_T) {
 }
 func (c *Client) handleEmptyBuffer(comp *C.COMPONENT_T) {
 	log.Printf("buffer emptied")
+}
+
+func (c *Component) SuggestBufferSize(size int) error {
+	if e := C.ilclient_suggest_bufsize(c.component, C.uint(size)); e != 0 {
+		return fmt.Errorf("suggest buffer size failed")
+	}
+
+	return nil
+}
+
+func (c *Component) GetInputPorts() []ComponentPort {
+	i := 0
+	var ret []ComponentPort
+
+	for {
+		p := C.ilclient_get_port_index(c.component, C.OMX_DirInput, C.OMX_PORTDOMAINTYPE(0XFFFFFFFF), C.int(i))
+		if p < 0 {
+			break
+		}
+
+		ret = append(ret, ComponentPort{c, int(p)})
+		i++
+	}
+
+	return ret
 }
 
 func (c *Component) OutputBuffer(port_index int) (*Buffer, error) {
