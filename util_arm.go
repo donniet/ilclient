@@ -211,3 +211,32 @@ func (e Error) String() string {
 	}
 	return fmt.Sprintf("UNKNOWN %x", e)
 }
+
+type CreateFlag C.ILCLIENT_CREATE_FLAGS_T
+
+const (
+	CreateFlagNone                CreateFlag = 0x0
+	CreateFlagEnableInputBuffers  CreateFlag = 0x1
+	CreateFlagEnableOutputBuffers CreateFlag = 0x2
+	CreateFlagDisableAllPorts     CreateFlag = 0x4
+	CreateFlagHostComponent       CreateFlag = 0x8
+	CreateFlagOutputZeroBuffers   CreateFlag = 0x10
+)
+
+func (f CreateFlag) String() string {
+	switch f {
+	case CreateFlagNone:
+		return "CreateFlagNone"
+	case CreateFlagEnableInputBuffers:
+		return "CreateFlagEnableInputBuffers"
+	case CreateFlagEnableOutputBuffers:
+		return "CreateFlagEnableOutputBuffers"
+	case CreateFlagDisableAllPorts:
+		return "CreateFlagDisableAllPorts"
+	case CreateFlagHostComponent:
+		return "CreateFlagHostComponent"
+	case CreateFlagOutputZeroBuffers:
+		return "CreateFlagOutputZeroBuffers"
+	}
+	return fmt.Sprintf("UNKNOWN: %d", f)
+}

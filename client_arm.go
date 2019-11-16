@@ -102,10 +102,16 @@ func New() *Client {
 	return c
 }
 
-func (c *Client) NewComponent(name string, flags C.ILCLIENT_CREATE_FLAGS_T) (*Component, error) {
+func (c *Client) NewComponent(name string, flags ...CreateFlag) (*Component, error) {
 	ret := &Component{}
 	var e C.int
-	ret.component = C.ilclient_create_component_wrapper(c.client, &e, C.CString(name), flags)
+
+	var fin C.ILCLIENT_CREATE_FLAGS_T
+	for f := range flags {
+		fin = fin | C.ILCLIENT_CREATE_FLAGS_T(f)
+	}
+
+	ret.component = C.ilclient_create_component_wrapper(c.client, &e, C.CString(name), fin)
 	if e != 0 {
 		return nil, fmt.Errorf("ilclient: could not create component: %v", Error(e))
 	}
@@ -200,12 +206,12 @@ func (c *Component) SuggestBufferSize(size int) error {
 	return nil
 }
 
-func (c *Component) GetInputPorts() []ComponentPort {
+func (c *Component) queryPorts(dir C.OMX_DIRTYPE, domain C.OMX_PORTDOMAINTYPE) []ComponentPort {
 	i := 0
 	var ret []ComponentPort
 
 	for {
-		p := C.ilclient_get_port_index(c.component, C.OMX_DirInput, C.OMX_PORTDOMAINTYPE(0XFFFFFFFF), C.int(i))
+		p := C.ilclient_get_port_index(c.component, dir, domain, C.int(i))
 		if p < 0 {
 			break
 		}
@@ -215,6 +221,14 @@ func (c *Component) GetInputPorts() []ComponentPort {
 	}
 
 	return ret
+}
+
+func (c *Component) InputPorts() []ComponentPort {
+	return c.queryPorts(C.OMX_DirInput, C.OMX_PORTDOMAINTYPE(0XFFFFFFFF))
+}
+
+func (c *Component) OutputPorts() []ComponentPort {
+	return c.queryPorts(C.OMX_DirOutput, C.OMX_PORTDOMAINTYPE(0XFFFFFFFF))
 }
 
 func (c *Component) OutputBuffer(port_index int) (*Buffer, error) {
