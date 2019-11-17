@@ -29,23 +29,23 @@ int ilclient_enable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
 void ilclient_disable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
 	ilclient_disable_port_buffers(comp, port_index, NULL, NULL, NULL);
 }
-void ilclient_set_error_callback_wrapper(ILCLIENT_T * handle, void * userdata) {
-	ilclient_set_error_callback(handle, goErrorHandler, userdata);
+void ilclient_set_error_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	ilclient_set_error_callback(handle, goErrorHandler, (void*)userdata);
 }
-void ilclient_set_port_settings_callback_wrapper(ILCLIENT_T * handle, void * userdata) {
-	ilclient_set_port_settings_callback(handle, goPortSettingsChangedHandler, userdata);
+void ilclient_set_port_settings_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	ilclient_set_port_settings_callback(handle, goPortSettingsChangedHandler, (void*)userdata);
 }
-void ilclient_set_eos_callback_wrapper(ILCLIENT_T * handle, void * userdata) {
-	ilclient_set_eos_callback(handle, goEOSHandler, userdata);
+void ilclient_set_eos_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	ilclient_set_eos_callback(handle, goEOSHandler, (void*)userdata);
 }
-void ilclient_set_configchanged_callback_wrapper(ILCLIENT_T * handle, void * userdata) {
-	ilclient_set_configchanged_callback(handle, goConfigChangedHandler, userdata);
+void ilclient_set_configchanged_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	ilclient_set_configchanged_callback(handle, goConfigChangedHandler, (void*)userdata);
 }
-void ilclient_set_fill_buffer_done_callback_wrapper(ILCLIENT_T * handle, void * userdata) {
-	ilclient_set_fill_buffer_done_callback(handle, goFillBufferHandler, userdata);
+void ilclient_set_fill_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	ilclient_set_fill_buffer_done_callback(handle, goFillBufferHandler, (void*)userdata);
 }
-void ilclient_set_empty_buffer_done_callback_wrapper(ILCLIENT_T * handle, void * userdata) {
-	ilclient_set_empty_buffer_done_callback(handle, goEmptyBufferHandler, userdata);
+void ilclient_set_empty_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	ilclient_set_empty_buffer_done_callback(handle, goEmptyBufferHandler, (void*)userdata);
 }
 */
 import "C"
@@ -55,7 +55,6 @@ import (
 	"log"
 	"sync"
 	"time"
-	"unsafe"
 )
 
 const default_timeout = 0
@@ -65,7 +64,7 @@ type Client struct {
 	Timeout    time.Duration
 	components map[*C.COMPONENT_T]*Component
 	tunnels    map[*C.TUNNEL_T]*Tunnel
-	clientID   int
+	clientID   C.int
 }
 type Event struct{}
 type Component struct {
@@ -83,8 +82,8 @@ type ComponentPort struct {
 }
 
 var (
-	clients     map[int]*Client
-	clientID    int
+	clients     map[C.int]*Client
+	clientID    C.int
 	clientsLock sync.Mutex
 )
 
@@ -94,30 +93,30 @@ func init() {
 	C.OMX_Init()
 
 	clientID = 0
-	clients = make(map[int]*Client)
+	clients = make(map[C.int]*Client)
 }
 
 func New() *Client {
 	clientsLock.Lock()
 	defer clientsLock.Unlock()
-	
+
 	c := &Client{
 		client:  C.ilclient_init(),
 		Timeout: default_timeout,
 
 		components: make(map[*C.COMPONENT_T]*Component),
 		tunnels:    make(map[*C.TUNNEL_T]*Tunnel),
-		clientID: clientID,
+		clientID:   clientID,
 	}
 	clientID++
 	clients[c.clientID] = c
 
-	C.ilclient_set_error_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
-	C.ilclient_set_port_settings_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
-	C.ilclient_set_eos_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
-	C.ilclient_set_configchanged_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
-	C.ilclient_set_fill_buffer_done_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
-	C.ilclient_set_empty_buffer_done_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
+	C.ilclient_set_error_callback_wrapper(c.client, &c.clientID)
+	C.ilclient_set_port_settings_callback_wrapper(c.client, &c.clientID)
+	C.ilclient_set_eos_callback_wrapper(c.client, &c.clientID)
+	C.ilclient_set_configchanged_callback_wrapper(c.client, &c.clientID)
+	C.ilclient_set_fill_buffer_done_callback_wrapper(c.client, &c.clientID)
+	C.ilclient_set_empty_buffer_done_callback_wrapper(c.client, &c.clientID)
 
 	return c
 }

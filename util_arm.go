@@ -19,7 +19,7 @@ import (
 
 //export goErrorHandler
 func goErrorHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	clientID = *(*int)(userdata)
+	clientID = *(*C.int)(userdata)
 
 	client := clients[clientID]
 
@@ -32,7 +32,7 @@ func goErrorHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32
 
 //export goPortSettingsChangedHandler
 func goPortSettingsChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	clientID = *(*int)(userdata)
+	clientID = *(*C.int)(userdata)
 
 	client := clients[clientID]
 
@@ -44,7 +44,7 @@ func goPortSettingsChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, 
 
 //export goEOSHandler
 func goEOSHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	clientID = *(*int)(userdata)
+	clientID = *(*C.int)(userdata)
 
 	client := clients[clientID]
 
@@ -56,7 +56,7 @@ func goEOSHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) 
 
 //export goConfigChangedHandler
 func goConfigChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	clientID = *(*int)(userdata)
+	clientID = *(*C.int)(userdata)
 
 	client := clients[clientID]
 
@@ -68,7 +68,7 @@ func goConfigChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C
 
 //export goFillBufferHandler
 func goFillBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
-	clientID = *(*int)(userdata)
+	clientID = *(*C.int)(userdata)
 
 	client := clients[clientID]
 
@@ -80,7 +80,7 @@ func goFillBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
 
 //export goEmptyBufferHandler
 func goEmptyBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
-	clientID = *(*int)(userdata)
+	clientID = *(*C.int)(userdata)
 
 	client := clients[clientID]
 
