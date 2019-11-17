@@ -55,6 +55,7 @@ import (
 	"log"
 	"time"
 	"unsafe"
+	"pointer"
 )
 
 const default_timeout = 0
@@ -63,7 +64,6 @@ type Client struct {
 	client     *C.ILCLIENT_T
 	Timeout    time.Duration
 	components map[*C.COMPONENT_T]*Component
-
 	tunnels map[*C.TUNNEL_T]*Tunnel
 }
 type Event struct{}
