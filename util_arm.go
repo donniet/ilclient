@@ -19,43 +19,74 @@ import (
 
 //export goErrorHandler
 func goErrorHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	client := (*Client)(userdata)
+	clientID = *(*int)(userdata)
+
+	client := clients[clientID]
+
+	if client == nil {
+		return
+	}
 
 	client.handleError(comp, data)
 }
 
 //export goPortSettingsChangedHandler
 func goPortSettingsChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	client := (*Client)(userdata)
+	clientID = *(*int)(userdata)
 
+	client := clients[clientID]
+
+	if client == nil {
+		return
+	}
 	client.portSettingsChanged(comp, data)
 }
 
 //export goEOSHandler
 func goEOSHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	client := (*Client)(userdata)
+	clientID = *(*int)(userdata)
 
+	client := clients[clientID]
+
+	if client == nil {
+		return
+	}
 	client.handleEOS(comp, data)
 }
 
 //export goConfigChangedHandler
 func goConfigChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	client := (*Client)(userdata)
+	clientID = *(*int)(userdata)
 
+	client := clients[clientID]
+
+	if client == nil {
+		return
+	}
 	client.handleConfigChanged(comp, data)
 }
 
 //export goFillBufferHandler
 func goFillBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
-	client := (*Client)(userdata)
+	clientID = *(*int)(userdata)
 
+	client := clients[clientID]
+
+	if client == nil {
+		return
+	}
 	client.handleFillBuffer(comp)
 }
 
 //export goEmptyBufferHandler
 func goEmptyBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
-	client := (*Client)(userdata)
+	clientID = *(*int)(userdata)
 
+	client := clients[clientID]
+
+	if client == nil {
+		return
+	}
 	client.handleEmptyBuffer(comp)
 }
 

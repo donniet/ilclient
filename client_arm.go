@@ -53,9 +53,9 @@ import "C"
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 	"unsafe"
-	"pointer"
 )
 
 const default_timeout = 0
@@ -64,7 +64,8 @@ type Client struct {
 	client     *C.ILCLIENT_T
 	Timeout    time.Duration
 	components map[*C.COMPONENT_T]*Component
-	tunnels map[*C.TUNNEL_T]*Tunnel
+	tunnels    map[*C.TUNNEL_T]*Tunnel
+	clientID   int
 }
 type Event struct{}
 type Component struct {
@@ -81,26 +82,42 @@ type ComponentPort struct {
 	port      int
 }
 
+var (
+	clients     map[int]*Client
+	clientID    int
+	clientsLock sync.Mutex
+)
+
 func init() {
 	C.bcm_host_init()
 
 	C.OMX_Init()
+
+	clientID = 0
+	clients = make(map[int]*Client)
 }
 
 func New() *Client {
+	clientsLock.Lock()
+	defer clientsLock.Unlock()
+	
 	c := &Client{
 		client:  C.ilclient_init(),
 		Timeout: default_timeout,
 
 		components: make(map[*C.COMPONENT_T]*Component),
 		tunnels:    make(map[*C.TUNNEL_T]*Tunnel),
+		clientID: clientID,
 	}
-	C.ilclient_set_error_callback_wrapper(c.client, unsafe.Pointer(c))
-	C.ilclient_set_port_settings_callback_wrapper(c.client, unsafe.Pointer(c))
-	C.ilclient_set_eos_callback_wrapper(c.client, unsafe.Pointer(c))
-	C.ilclient_set_configchanged_callback_wrapper(c.client, unsafe.Pointer(c))
-	C.ilclient_set_fill_buffer_done_callback_wrapper(c.client, unsafe.Pointer(c))
-	C.ilclient_set_empty_buffer_done_callback_wrapper(c.client, unsafe.Pointer(c))
+	clientID++
+	clients[c.clientID] = c
+
+	C.ilclient_set_error_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
+	C.ilclient_set_port_settings_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
+	C.ilclient_set_eos_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
+	C.ilclient_set_configchanged_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
+	C.ilclient_set_fill_buffer_done_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
+	C.ilclient_set_empty_buffer_done_callback_wrapper(c.client, unsafe.Pointer(&c.clientID))
 
 	return c
 }
@@ -176,6 +193,11 @@ func (c *Client) Close() {
 	C.ilclient_cleanup_components(&comps[0])
 
 	C.ilclient_destroy(c.client)
+
+	clientsLock.Lock()
+	defer clientsLock.Unlock()
+
+	delete(clients, c.clientID)
 }
 
 func (c *Client) handleError(comp *C.COMPONENT_T, data C.OMX_U32) {
