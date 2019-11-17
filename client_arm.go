@@ -7,6 +7,7 @@ package ilclient
 #include <OMX_Core.h>
 #include <OMX_Component.h>
 
+#include <stdio.h>
 #include <bcm_host.h>
 #include <ilclient.h>
 
@@ -19,33 +20,46 @@ extern void goEmptyBufferHandler(void * userdata, COMPONENT_T * comp);
 
 COMPONENT_T* ilclient_create_component_wrapper(ILCLIENT_T *handle, int * ret, char * name, ILCLIENT_CREATE_FLAGS_T flags) {
 	COMPONENT_T * comp = NULL;
+	fprintf(stderr, "ilclient_create_component\n");
 	*ret = ilclient_create_component(handle, &comp, name, flags);
 	return comp;
 }
 
 int ilclient_enable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
+	fprintf(stderr, "ilclient_enable_port_buffers\n");
 	return ilclient_enable_port_buffers(comp, port_index, NULL, NULL, NULL);
 }
 void ilclient_disable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
+	fprintf(stderr, "ilclient_disable_port_buffers\n");
 	ilclient_disable_port_buffers(comp, port_index, NULL, NULL, NULL);
 }
 void ilclient_set_error_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	fprintf(stderr, "ilclient_set_error_callback\n");
 	ilclient_set_error_callback(handle, goErrorHandler, (void*)userdata);
 }
 void ilclient_set_port_settings_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	fprintf(stderr, "ilclient_set_port_settings_callback\n");
 	ilclient_set_port_settings_callback(handle, goPortSettingsChangedHandler, (void*)userdata);
 }
 void ilclient_set_eos_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	fprintf(stderr, "ilclient_set_eos_callback\n");
 	ilclient_set_eos_callback(handle, goEOSHandler, (void*)userdata);
 }
 void ilclient_set_configchanged_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	fprintf(stderr, "ilclient_set_configchanged_callback\n");
 	ilclient_set_configchanged_callback(handle, goConfigChangedHandler, (void*)userdata);
 }
 void ilclient_set_fill_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	fprintf(stderr, "ilclient_set_fill_buffer_done_callback\n");
 	ilclient_set_fill_buffer_done_callback(handle, goFillBufferHandler, (void*)userdata);
 }
 void ilclient_set_empty_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
+	fprintf(stderr, "ilclient_set_empty_buffer_done_callback\n");
 	ilclient_set_empty_buffer_done_callback(handle, goEmptyBufferHandler, (void*)userdata);
+}
+int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state) {
+	fprintf(stderr, "OMX_GetState\n");
+	return OMX_GetState(ilclient_get_handle(comp), state);
 }
 */
 import "C"
@@ -53,6 +67,7 @@ import "C"
 import (
 	"fmt"
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -65,6 +80,7 @@ type Client struct {
 	components map[*C.COMPONENT_T]*Component
 	tunnels    map[*C.TUNNEL_T]*Tunnel
 	clientID   C.int
+	lock       sync.Locker
 }
 type Event struct{}
 type Component struct {
@@ -84,14 +100,18 @@ type ComponentPort struct {
 var (
 	clients     map[C.int]*Client
 	clientID    C.int
-	clientsLock sync.Mutex
+	clientsLock sync.Locker
 )
 
 func init() {
+	fmt.Fprintf(os.Stderr, "bcm_host_init\n")
 	C.bcm_host_init()
 
-	C.OMX_Init()
+	fmt.Fprintf(os.Stderr, "OMX_Init ")
+	err := C.OMX_Init()
+	fmt.Fprintf(os.Stderr, "ret: %v\n", Error(err))
 
+	clientsLock = &sync.Mutex{}
 	clientID = 0
 	clients = make(map[C.int]*Client)
 }
@@ -100,13 +120,18 @@ func New() *Client {
 	clientsLock.Lock()
 	defer clientsLock.Unlock()
 
+	fmt.Fprintf(os.Stderr, "ilclient_init ")
+	client := C.ilclient_init()
+	fmt.Fprintf(os.Stderr, "response: %v\n", client)
+
 	c := &Client{
-		client:  C.ilclient_init(),
+		client:  client,
 		Timeout: default_timeout,
 
 		components: make(map[*C.COMPONENT_T]*Component),
 		tunnels:    make(map[*C.TUNNEL_T]*Tunnel),
 		clientID:   clientID,
+		lock:       &sync.Mutex{},
 	}
 	clientID++
 	clients[c.clientID] = c
@@ -134,6 +159,9 @@ func (c *Client) NewComponent(name string, flags ...CreateFlag) (*Component, err
 	if e != 0 {
 		return nil, fmt.Errorf("ilclient: could not create component: %v", Error(e))
 	}
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.components[ret.component] = ret
 
 	return ret, nil
@@ -151,6 +179,9 @@ func (c *Client) NewTunnel(source, sink ComponentPort) (*Tunnel, error) {
 	}
 
 	ret := &Tunnel{t}
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
 	c.tunnels[t] = ret
 
 	return ret, nil
@@ -159,6 +190,10 @@ func (c *Client) NewTunnel(source, sink ComponentPort) (*Tunnel, error) {
 func (c *Client) Close() {
 	// cleanup tunnels
 	// list of null terminated tunnels
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	tuns := make([]C.TUNNEL_T, len(c.tunnels)+1)
 	i := 0
 	for t, _ := range c.tunnels {
@@ -269,6 +304,17 @@ func (c *Component) InputBuffer(port_index int) (*Buffer, error) {
 		return nil, fmt.Errorf("input buffer not available for port %d", port_index)
 	}
 	return &Buffer{buf}, nil
+}
+
+func (c *Component) State() (State, error) {
+	var s C.OMX_STATETYPE
+	e := C.get_component_state(c.component, &s)
+
+	if e != C.OMX_ErrorNone {
+		return State(s), Error(e)
+	}
+
+	return State(s), nil
 }
 
 func (c *Component) SetState(state State) error {

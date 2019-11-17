@@ -128,6 +128,14 @@ func (s State) String() string {
 	}
 	return fmt.Sprintf("UNKONWN %v", int(s))
 }
+const (
+	StateIdle State = C.OMX_StateIdle
+	StateLoaded State = C.OMX_StateLoaded
+	StateInvalid State = C.OMX_StateInvalid
+	StateExecuting State = C.OMX_StateExecuting
+	StatePause State = C.OMX_StatePause
+	StateWaitForResources State = C.OMX_StateWaitForResources
+)
 
 type TunnelError int
 
