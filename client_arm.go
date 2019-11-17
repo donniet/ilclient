@@ -91,6 +91,9 @@ func New() *Client {
 	c := &Client{
 		client:  C.ilclient_init(),
 		Timeout: default_timeout,
+
+		components: make(map[*C.COMPONENT_T]*Component),
+		tunnels:    make(map[*C.TUNNEL_T]*Tunnel),
 	}
 	C.ilclient_set_error_callback_wrapper(c.client, unsafe.Pointer(c))
 	C.ilclient_set_port_settings_callback_wrapper(c.client, unsafe.Pointer(c))
