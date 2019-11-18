@@ -2,11 +2,12 @@ package ilclient
 
 /*
 #cgo CFLAGS: -Wno-unused-variable -Wall -Wno-deprecated -g -DRASPBERRY_PI -DSTANDALONE -D__STDC_CONSTANT_MACROS  -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -I/opt/vc/include/IL -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux/ -I/opt/vc/src/hello_pi/libs/ilclient
-#cgo LDFLAGS: -L /opt/vc/lib -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -L/opt/vc/src/hello_pi/libs/ilclient -lilclient
+#cgo LDFLAGS: -L /opt/vc/lib -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -L/opt/vc/src/hello_pi/libs/ilclient -lilclient -Wl,--no-whole-archive
 
 #include <OMX_Core.h>
 #include <OMX_Component.h>
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <bcm_host.h>
 #include <ilclient.h>
@@ -23,6 +24,14 @@ COMPONENT_T* ilclient_create_component_wrapper(ILCLIENT_T *handle, int * ret, ch
 	fprintf(stderr, "ilclient_create_component\n");
 	*ret = ilclient_create_component(handle, &comp, name, flags);
 	return comp;
+}
+
+void enable_trace_logging() {
+	fprintf(stderr, "VC_LOGLEVEL=%s\n", getenv("VC_LOGLEVEL"));
+
+	putenv("VC_LOGLEVEL=ilclient:trace");
+
+	fprintf(stderr, "VC_LOGLEVEL=%s\n", getenv("VC_LOGLEVEL"));
 }
 
 int ilclient_enable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
@@ -98,52 +107,42 @@ type ComponentPort struct {
 }
 
 var (
-	clients     map[C.int]*Client
-	clientID    C.int
-	clientsLock sync.Locker
+	client *Client
 )
 
 func init() {
+	C.enable_trace_logging()
+
 	fmt.Fprintf(os.Stderr, "bcm_host_init\n")
 	C.bcm_host_init()
 
-	fmt.Fprintf(os.Stderr, "OMX_Init ")
-	err := C.OMX_Init()
-	fmt.Fprintf(os.Stderr, "ret: %v\n", Error(err))
-
-	clientsLock = &sync.Mutex{}
-	clientID = 0
-	clients = make(map[C.int]*Client)
-}
-
-func New() *Client {
-	clientsLock.Lock()
-	defer clientsLock.Unlock()
-
 	fmt.Fprintf(os.Stderr, "ilclient_init ")
-	client := C.ilclient_init()
+	c := C.ilclient_init()
 	fmt.Fprintf(os.Stderr, "response: %v\n", client)
 
-	c := &Client{
-		client:  client,
+	client = &Client{
+		client:  c,
 		Timeout: default_timeout,
 
 		components: make(map[*C.COMPONENT_T]*Component),
 		tunnels:    make(map[*C.TUNNEL_T]*Tunnel),
-		clientID:   clientID,
 		lock:       &sync.Mutex{},
 	}
-	clientID++
-	clients[c.clientID] = c
 
-	C.ilclient_set_error_callback_wrapper(c.client, &c.clientID)
-	C.ilclient_set_port_settings_callback_wrapper(c.client, &c.clientID)
-	C.ilclient_set_eos_callback_wrapper(c.client, &c.clientID)
-	C.ilclient_set_configchanged_callback_wrapper(c.client, &c.clientID)
-	C.ilclient_set_fill_buffer_done_callback_wrapper(c.client, &c.clientID)
-	C.ilclient_set_empty_buffer_done_callback_wrapper(c.client, &c.clientID)
+	C.ilclient_set_error_callback_wrapper(client.client, nil)
+	C.ilclient_set_port_settings_callback_wrapper(client.client, nil)
+	C.ilclient_set_eos_callback_wrapper(client.client, nil)
+	C.ilclient_set_configchanged_callback_wrapper(client.client, nil)
+	C.ilclient_set_fill_buffer_done_callback_wrapper(client.client, nil)
+	C.ilclient_set_empty_buffer_done_callback_wrapper(client.client, nil)
 
-	return c
+	fmt.Fprintf(os.Stderr, "OMX_Init ")
+	err := C.OMX_Init()
+	fmt.Fprintf(os.Stderr, "ret: %v\n", Error(err))
+}
+
+func Get() *Client {
+	return client
 }
 
 func (c *Client) NewComponent(name string, flags ...CreateFlag) (*Component, error) {
@@ -227,11 +226,6 @@ func (c *Client) Close() {
 	C.ilclient_cleanup_components(&comps[0])
 
 	C.ilclient_destroy(c.client)
-
-	clientsLock.Lock()
-	defer clientsLock.Unlock()
-
-	delete(clients, c.clientID)
 }
 
 func (c *Client) handleError(comp *C.COMPONENT_T, data C.OMX_U32) {
@@ -291,6 +285,7 @@ func (c *Component) OutputPorts() []ComponentPort {
 }
 
 func (c *Component) OutputBuffer(port_index int) (*Buffer, error) {
+	fmt.Fprintf(os.Stderr, "ilclient_get_output_buffer\n")
 	buf := C.ilclient_get_output_buffer(c.component, C.int(port_index), 0)
 	if buf == nil {
 		return nil, fmt.Errorf("output buffer not available for port %d", port_index)
@@ -299,6 +294,7 @@ func (c *Component) OutputBuffer(port_index int) (*Buffer, error) {
 }
 
 func (c *Component) InputBuffer(port_index int) (*Buffer, error) {
+	fmt.Fprintf(os.Stderr, "ilclient_get_input_buffer\n")
 	buf := C.ilclient_get_input_buffer(c.component, C.int(port_index), 0)
 	if buf == nil {
 		return nil, fmt.Errorf("input buffer not available for port %d", port_index)

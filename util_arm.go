@@ -14,98 +14,36 @@ import "C"
 
 import (
 	"fmt"
-	"log"
 	"unsafe"
 )
 
 //export goErrorHandler
 func goErrorHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	clientID = *(*C.int)(userdata)
-
-	clientsLock.Lock()
-	client := clients[clientID]
-	clientsLock.Unlock()
-
-	if client == nil {
-		log.Printf("error: error_handler: nil client")
-		return
-	}
-
 	client.handleError(comp, data)
 }
 
 //export goPortSettingsChangedHandler
 func goPortSettingsChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	clientID = *(*C.int)(userdata)
-
-	clientsLock.Lock()
-	client := clients[clientID]
-	clientsLock.Unlock()
-
-	if client == nil {
-		log.Printf("error: port_settings_changed_handler: nil client")
-		return
-	}
 	client.portSettingsChanged(comp, data)
 }
 
 //export goEOSHandler
 func goEOSHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	clientID = *(*C.int)(userdata)
-
-	clientsLock.Lock()
-	client := clients[clientID]
-	clientsLock.Unlock()
-
-	if client == nil {
-		log.Printf("error: eos_handler: nil client")
-		return
-	}
 	client.handleEOS(comp, data)
 }
 
 //export goConfigChangedHandler
 func goConfigChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	clientID = *(*C.int)(userdata)
-
-	clientsLock.Lock()
-	client := clients[clientID]
-	clientsLock.Unlock()
-
-	if client == nil {
-		log.Printf("error: config_changed_handler: nil client")
-		return
-	}
 	client.handleConfigChanged(comp, data)
 }
 
 //export goFillBufferHandler
 func goFillBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
-	clientID = *(*C.int)(userdata)
-
-	clientsLock.Lock()
-	client := clients[clientID]
-	clientsLock.Unlock()
-
-	if client == nil {
-		log.Printf("error: fill_buffer_handler: nil client")
-		return
-	}
 	client.handleFillBuffer(comp)
 }
 
 //export goEmptyBufferHandler
 func goEmptyBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
-	clientID = *(*C.int)(userdata)
-
-	clientsLock.Lock()
-	client := clients[clientID]
-	clientsLock.Unlock()
-
-	if client == nil {
-		log.Printf("error: empty_buffer_handler: nil client")
-		return
-	}
 	client.handleEmptyBuffer(comp)
 }
 
