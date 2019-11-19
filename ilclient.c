@@ -1405,8 +1405,8 @@ void ilclient_debug_output(char *format, ...)
    va_list args;
 
    va_start(args, format); 
-   // vcos_vlog_info(format, args);
-   fprintf(stderr, format, args);
+   vcos_vlog_info(format, args);
+   // fprintf(stderr, format, args);
    va_end(args);
 }
 

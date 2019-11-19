@@ -124,14 +124,14 @@ func (c *Client) NewComponent(name string, flags ...CreateFlag) (*Component, err
 	ret := &Component{}
 	var e C.int
 
-	var fin C.ILCLIENT_CREATE_FLAGS_T
-	for f := range flags {
-		fin = fin | C.ILCLIENT_CREATE_FLAGS_T(f)
+	var fin int
+	for _, f := range flags {
+		fin = fin | int(f)
 	}
 
 	str := C.CString(name)
 	defer C.free(unsafe.Pointer(str))
-	ret.component = C.ilclient_create_component_wrapper(c.client, &e, C.CString(name), fin)
+	ret.component = C.ilclient_create_component_wrapper(c.client, &e, C.CString(name), C.ILCLIENT_CREATE_FLAGS_T(fin))
 
 	if e != 0 {
 		return nil, fmt.Errorf("ilclient: could not create component: %v", Error(e))
@@ -501,12 +501,12 @@ func (e Error) String() string {
 type CreateFlag C.ILCLIENT_CREATE_FLAGS_T
 
 const (
-	CreateFlagNone                CreateFlag = 0x0
-	CreateFlagEnableInputBuffers  CreateFlag = 0x1
-	CreateFlagEnableOutputBuffers CreateFlag = 0x2
-	CreateFlagDisableAllPorts     CreateFlag = 0x4
-	CreateFlagHostComponent       CreateFlag = 0x8
-	CreateFlagOutputZeroBuffers   CreateFlag = 0x10
+	CreateFlagNone                CreateFlag = C.ILCLIENT_FLAGS_NONE
+	CreateFlagEnableInputBuffers  CreateFlag = C.ILCLIENT_ENABLE_INPUT_BUFFERS
+	CreateFlagEnableOutputBuffers CreateFlag = C.ILCLIENT_ENABLE_OUTPUT_BUFFERS
+	CreateFlagDisableAllPorts     CreateFlag = C.ILCLIENT_DISABLE_ALL_PORTS
+	CreateFlagHostComponent       CreateFlag = C.ILCLIENT_HOST_COMPONENT
+	CreateFlagOutputZeroBuffers   CreateFlag = C.ILCLIENT_OUTPUT_ZERO_BUFFERS
 )
 
 func (f CreateFlag) String() string {
@@ -524,5 +524,55 @@ func (f CreateFlag) String() string {
 	case CreateFlagOutputZeroBuffers:
 		return "CreateFlagOutputZeroBuffers"
 	}
-	return fmt.Sprintf("UNKNOWN: %x", int(f))
+	return fmt.Sprintf("UNKNOWN[%x]", int(f))
+}
+
+type PortIndex int
+
+const (
+	CameraPreviewOut         PortIndex = 70
+	CameraCaptureOut         PortIndex = 71
+	CameraStillCaptureOut    PortIndex = 72
+	CameraClockIn            PortIndex = 73
+	VideoSplitterInputIn     PortIndex = 250
+	VideoSplitterOutput1Out  PortIndex = 251
+	VideoSplitterOutput2Out  PortIndex = 252
+	VideoSplitterOutput3Out  PortIndex = 253
+	VideoSplitterOutput4Out  PortIndex = 254
+	ImageEncodeRawPixelsIn   PortIndex = 340
+	ImageEncodeCompressedOut PortIndex = 341
+	VideoEncodeRawVideoIn    PortIndex = 200
+	VideoEncodeCompressedOut PortIndex = 201
+)
+
+func (p PortIndex) String() string {
+	switch p {
+	case CameraPreviewOut:
+		return "CameraPreviewOut"
+	case CameraCaptureOut:
+		return "CameraCaptureOut"
+	case CameraStillCaptureOut:
+		return "CameraStillCaptureOut"
+	case CameraClockIn:
+		return "CameraClockIn"
+	case VideoSplitterInputIn:
+		return "VideoSplitterInputIn"
+	case VideoSplitterOutput1Out:
+		return "VideoSplitterOutput1Out"
+	case VideoSplitterOutput2Out:
+		return "VideoSplitterOutput2Out"
+	case VideoSplitterOutput3Out:
+		return "VideoSplitterOutput3Out"
+	case VideoSplitterOutput4Out:
+		return "VideoSplitterOutput4Out"
+	case ImageEncodeRawPixelsIn:
+		return "ImageEncodeRawPixelsIn"
+	case ImageEncodeCompressedOut:
+		return "ImageEncodeCompressedOut"
+	case VideoEncodeRawVideoIn:
+		return "VideoEncodeRawVideoIn"
+	case VideoEncodeCompressedOut:
+		return "VideoEncodeCompressedOut"
+	}
+	return fmt.Sprintf("UNKNOWN %d", int(p))
 }
