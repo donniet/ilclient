@@ -14,14 +14,9 @@ package ilclient
 
 extern COMPONENT_T* ilclient_create_component_wrapper(ILCLIENT_T *handle, int * ret, char * name, ILCLIENT_CREATE_FLAGS_T flags);
 extern void enable_trace_logging();
-extern int ilclient_enable_port_buffers_wrapper(COMPONENT_T * comp, int port_index);
-extern void ilclient_disable_port_buffers_wrapper(COMPONENT_T * comp, int port_index);
-extern void ilclient_set_error_callback_wrapper(ILCLIENT_T * handle, int * userdata);
-extern void ilclient_set_port_settings_callback_wrapper(ILCLIENT_T * handle, int * userdata);
-extern void ilclient_set_eos_callback_wrapper(ILCLIENT_T * handle, int * userdata);
-extern void ilclient_set_configchanged_callback_wrapper(ILCLIENT_T * handle, int * userdata);
-extern void ilclient_set_fill_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata);
-extern void ilclient_set_empty_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata);
+
+extern void setup_callbacks(ILCLIENT_T * handle);
+
 extern int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state);
 */
 import "C"
@@ -83,18 +78,45 @@ func init() {
 		lock:       &sync.Mutex{},
 	}
 
-	C.ilclient_set_error_callback_wrapper(client.client, nil)
-	C.ilclient_set_port_settings_callback_wrapper(client.client, nil)
-	C.ilclient_set_eos_callback_wrapper(client.client, nil)
-	C.ilclient_set_configchanged_callback_wrapper(client.client, nil)
-	C.ilclient_set_fill_buffer_done_callback_wrapper(client.client, nil)
-	C.ilclient_set_empty_buffer_done_callback_wrapper(client.client, nil)
+	C.setup_callbacks(client.client);
 
 	fmt.Fprintf(os.Stderr, "OMX_Init ")
 	err := C.OMX_Init()
 	fmt.Fprintf(os.Stderr, "ret: %v\n", Error(err))
 
 }
+
+
+//export goErrorHandler
+func goErrorHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
+	client.handleError(comp, data)
+}
+
+//export goPortSettingsChangedHandler
+func goPortSettingsChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
+	client.portSettingsChanged(comp, data)
+}
+
+//export goEOSHandler
+func goEOSHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
+	client.handleEOS(comp, data)
+}
+
+//export goConfigChangedHandler
+func goConfigChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
+	client.handleConfigChanged(comp, data)
+}
+
+//export goFillBufferHandler
+func goFillBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
+	client.handleFillBuffer(comp)
+}
+
+//export goEmptyBufferHandler
+func goEmptyBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
+	client.handleEmptyBuffer(comp)
+}
+
 
 func Get() *Client {
 	return client
@@ -291,14 +313,14 @@ func (c *Component) DisablePort(port_index int) {
 }
 
 func (c *Component) EnablePortBuffers(port_index int) error {
-	if e := C.ilclient_enable_port_buffers_wrapper(c.component, C.int(port_index)); e != 0 {
+	if e := C.ilclient_enable_port_buffers(c.component, C.int(port_index), nil, nil, nil); e != 0 {
 		return fmt.Errorf("error: EnablePortBuffers: %v", Error(e))
 	}
 	return nil
 }
 
 func (c *Component) DisablePortBuffers(port_index int) {
-	C.ilclient_disable_port_buffers_wrapper(c.component, C.int(port_index))
+	C.ilclient_disable_port_buffers(c.component, C.int(port_index), nil, nil, nil)
 }
 
 func (t *Tunnel) Close() {

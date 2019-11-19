@@ -28,38 +28,16 @@ void enable_trace_logging() {
 	fprintf(stderr, "VC_LOGLEVEL=%s\n", getenv("VC_LOGLEVEL"));
 }
 
-int ilclient_enable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
-	fprintf(stderr, "ilclient_enable_port_buffers\n");
-	return ilclient_enable_port_buffers(comp, port_index, NULL, NULL, NULL);
+void setup_callbacks(ILCLIENT_T * handle) {
+	ilclient_set_error_callback(handle, goErrorHandler, NULL);
+	ilclient_set_port_settings_callback(handle, goPortSettingsChangedHandler, NULL);
+	ilclient_set_eos_callback(handle, goEOSHandler, NULL);
+	ilclient_set_configchanged_callback(handle, goConfigChangedHandler, NULL);
+	ilclient_set_fill_buffer_done_callback(handle, goFillBufferHandler, NULL);
+	ilclient_set_empty_buffer_done_callback(handle, goEmptyBufferHandler, NULL);
 }
-void ilclient_disable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
-	fprintf(stderr, "ilclient_disable_port_buffers\n");
-	ilclient_disable_port_buffers(comp, port_index, NULL, NULL, NULL);
-}
-void ilclient_set_error_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_error_callback\n");
-	ilclient_set_error_callback(handle, goErrorHandler, (void*)userdata);
-}
-void ilclient_set_port_settings_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_port_settings_callback\n");
-	ilclient_set_port_settings_callback(handle, goPortSettingsChangedHandler, (void*)userdata);
-}
-void ilclient_set_eos_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_eos_callback\n");
-	ilclient_set_eos_callback(handle, goEOSHandler, (void*)userdata);
-}
-void ilclient_set_configchanged_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_configchanged_callback\n");
-	ilclient_set_configchanged_callback(handle, goConfigChangedHandler, (void*)userdata);
-}
-void ilclient_set_fill_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_fill_buffer_done_callback\n");
-	ilclient_set_fill_buffer_done_callback(handle, goFillBufferHandler, (void*)userdata);
-}
-void ilclient_set_empty_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_empty_buffer_done_callback\n");
-	ilclient_set_empty_buffer_done_callback(handle, goEmptyBufferHandler, (void*)userdata);
-}
+
+// important because OMX_GetState is a macro
 int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state) {
 	fprintf(stderr, "OMX_GetState\n");
 	return OMX_GetState(ilclient_get_handle(comp), state);

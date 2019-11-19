@@ -11,39 +11,7 @@ import "C"
 
 import (
 	"fmt"
-	"unsafe"
 )
-
-
-//export goErrorHandler
-func goErrorHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	client.handleError(comp, data)
-}
-
-//export goPortSettingsChangedHandler
-func goPortSettingsChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	client.portSettingsChanged(comp, data)
-}
-
-//export goEOSHandler
-func goEOSHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	client.handleEOS(comp, data)
-}
-
-//export goConfigChangedHandler
-func goConfigChangedHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T, data C.OMX_U32) {
-	client.handleConfigChanged(comp, data)
-}
-
-//export goFillBufferHandler
-func goFillBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
-	client.handleFillBuffer(comp)
-}
-
-//export goEmptyBufferHandler
-func goEmptyBufferHandler(userdata unsafe.Pointer, comp *C.COMPONENT_T) {
-	client.handleEmptyBuffer(comp)
-}
 
 type State C.OMX_STATETYPE
 
