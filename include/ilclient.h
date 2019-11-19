@@ -934,6 +934,8 @@ VCHPRE_ int VCHPOST_ ilclient_wait_for_command_complete_dual(COMPONENT_T *comp,
  ***********************************************************/
 VCHPRE_ void VCHPOST_ ilclient_debug_output(char *format, ...);
 
+// #define ilclient_debug_output(...) fprintf(stderr, __VA_ARGS__)
+
 /**
  * The <DFN>ilclient_get_handle()</DFN> function returns the
  * underlying OMX component held by an IL component handle.  This is

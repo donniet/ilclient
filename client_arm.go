@@ -4,10 +4,6 @@ package ilclient
 #cgo CFLAGS: -Wno-unused-variable -Wall -Wno-deprecated -g -DRASPBERRY_PI -DSTANDALONE -D__STDC_CONSTANT_MACROS  -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -I/opt/vc/include/IL -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux/ -I./include
 #cgo LDFLAGS: -L/opt/vc/lib -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt
 
-
-
-//-L/opt/vc/src/hello_pi/libs/ilclient -lilclient
-
 #include <OMX_Core.h>
 #include <OMX_Component.h>
 
@@ -16,64 +12,17 @@ package ilclient
 #include <bcm_host.h>
 #include <ilclient.h>
 
-extern void goErrorHandler(void * userdata, COMPONENT_T * comp, OMX_U32 data);
-extern void goPortSettingsChangedHandler(void * userdata, COMPONENT_T * comp, OMX_U32 data);
-extern void goEOSHandler(void * userdata, COMPONENT_T * comp, OMX_U32 data);
-extern void goConfigChangedHandler(void * userdata, COMPONENT_T * comp, OMX_U32 data);
-extern void goFillBufferHandler(void * userdata, COMPONENT_T * comp);
-extern void goEmptyBufferHandler(void * userdata, COMPONENT_T * comp);
-
-COMPONENT_T* ilclient_create_component_wrapper(ILCLIENT_T *handle, int * ret, char * name, ILCLIENT_CREATE_FLAGS_T flags) {
-	COMPONENT_T * comp = NULL;
-	fprintf(stderr, "ilclient_create_component\n");
-	*ret = ilclient_create_component(handle, &comp, name, flags);
-	return comp;
-}
-
-void enable_trace_logging() {
-	fprintf(stderr, "VC_LOGLEVEL=%s\n", getenv("VC_LOGLEVEL"));
-
-	putenv("VC_LOGLEVEL=ilclient:trace");
-
-	fprintf(stderr, "VC_LOGLEVEL=%s\n", getenv("VC_LOGLEVEL"));
-}
-
-int ilclient_enable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
-	fprintf(stderr, "ilclient_enable_port_buffers\n");
-	return ilclient_enable_port_buffers(comp, port_index, NULL, NULL, NULL);
-}
-void ilclient_disable_port_buffers_wrapper(COMPONENT_T * comp, int port_index) {
-	fprintf(stderr, "ilclient_disable_port_buffers\n");
-	ilclient_disable_port_buffers(comp, port_index, NULL, NULL, NULL);
-}
-void ilclient_set_error_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_error_callback\n");
-	ilclient_set_error_callback(handle, goErrorHandler, (void*)userdata);
-}
-void ilclient_set_port_settings_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_port_settings_callback\n");
-	ilclient_set_port_settings_callback(handle, goPortSettingsChangedHandler, (void*)userdata);
-}
-void ilclient_set_eos_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_eos_callback\n");
-	ilclient_set_eos_callback(handle, goEOSHandler, (void*)userdata);
-}
-void ilclient_set_configchanged_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_configchanged_callback\n");
-	ilclient_set_configchanged_callback(handle, goConfigChangedHandler, (void*)userdata);
-}
-void ilclient_set_fill_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_fill_buffer_done_callback\n");
-	ilclient_set_fill_buffer_done_callback(handle, goFillBufferHandler, (void*)userdata);
-}
-void ilclient_set_empty_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata) {
-	fprintf(stderr, "ilclient_set_empty_buffer_done_callback\n");
-	ilclient_set_empty_buffer_done_callback(handle, goEmptyBufferHandler, (void*)userdata);
-}
-int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state) {
-	fprintf(stderr, "OMX_GetState\n");
-	return OMX_GetState(ilclient_get_handle(comp), state);
-}
+extern COMPONENT_T* ilclient_create_component_wrapper(ILCLIENT_T *handle, int * ret, char * name, ILCLIENT_CREATE_FLAGS_T flags);
+extern void enable_trace_logging();
+extern int ilclient_enable_port_buffers_wrapper(COMPONENT_T * comp, int port_index);
+extern void ilclient_disable_port_buffers_wrapper(COMPONENT_T * comp, int port_index);
+extern void ilclient_set_error_callback_wrapper(ILCLIENT_T * handle, int * userdata);
+extern void ilclient_set_port_settings_callback_wrapper(ILCLIENT_T * handle, int * userdata);
+extern void ilclient_set_eos_callback_wrapper(ILCLIENT_T * handle, int * userdata);
+extern void ilclient_set_configchanged_callback_wrapper(ILCLIENT_T * handle, int * userdata);
+extern void ilclient_set_fill_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata);
+extern void ilclient_set_empty_buffer_done_callback_wrapper(ILCLIENT_T * handle, int * userdata);
+extern int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state);
 */
 import "C"
 

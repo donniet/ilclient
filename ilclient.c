@@ -157,6 +157,8 @@ Global functions
  ***********************************************************/
 ILCLIENT_T *ilclient_init()
 {
+   fprintf(stderr, "\nilclient_init DT\n");
+   ilclient_debug_output("testing the debug output\n");
    ILCLIENT_T *st = vcos_malloc(sizeof(ILCLIENT_T), "ilclient");
    int i;
    
@@ -1368,9 +1370,9 @@ void ilclient_debug_output(char *format, ...)
 {
    va_list args;
 
-   va_start(args, format);
+   va_start(args, format); 
    vcos_vlog_info(format, args);
-   fprintf(stderr, format, args);
+   // fprintf(stderr, format, args);
    va_end(args);
 }
 
