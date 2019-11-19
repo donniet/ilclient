@@ -157,8 +157,6 @@ Global functions
  ***********************************************************/
 ILCLIENT_T *ilclient_init()
 {
-   fprintf(stderr, "\nilclient_init DT\n");
-   ilclient_debug_output("testing the debug output\n");
    ILCLIENT_T *st = vcos_malloc(sizeof(ILCLIENT_T), "ilclient");
    int i;
    
@@ -1404,6 +1402,26 @@ static void ilclient_unlock_events(ILCLIENT_T *st)
    vcos_semaphore_post(&st->event_sema);
 }
 
+static const char * ilclient_event_string(OMX_IN OMX_EVENTTYPE eEvent) {
+   switch(eEvent) {
+   case OMX_EventCmdComplete: return "OMX_EventCmdComplete";         
+   case OMX_EventError: return "OMX_EventError";                
+   case OMX_EventMark: return "OMX_EventMark";                 
+   case OMX_EventPortSettingsChanged: return "OMX_EventPortSettingsChanged";  
+   case OMX_EventBufferFlag: return "OMX_EventBufferFlag";           
+   case OMX_EventResourcesAcquired: return "OMX_EventResourcesAcquired";    
+   case OMX_EventComponentResumed: return "OMX_EventComponentResumed";      
+   case OMX_EventDynamicResourcesAvailable: return "OMX_EventDynamicResourcesAvailable";  
+   case OMX_EventPortFormatDetected: return "OMX_EventPortFormatDetected";       
+   case OMX_EventKhronosExtensions: return "OMX_EventKhronosExtensions";
+   case OMX_EventVendorStartUnused: return "OMX_EventVendorStartUnused"; 
+   case OMX_EventParamOrConfigChanged: return "OMX_EventParamOrConfigChanged"; 
+   case OMX_EventMax: return "OMX_EventMax";
+   }
+
+   return "";
+}
+
 /***********************************************************
  * Name: ilclient_event_handler
  *
@@ -1419,6 +1437,10 @@ static OMX_ERRORTYPE ilclient_event_handler(OMX_IN OMX_HANDLETYPE hComponent,
                                             OMX_IN OMX_U32 nData2,
                                             OMX_IN OMX_PTR pEventData)
 {
+
+   fprintf(stderr, "ilclient_event_handler(%p %p %s %d %d %p)\n", 
+      hComponent, pAppData, ilclient_event_string(eEvent), nData1, nData2, pEventData);
+
    COMPONENT_T *st = (COMPONENT_T *) pAppData;
    ILEVENT_T *event;
    OMX_ERRORTYPE error = OMX_ErrorNone;
