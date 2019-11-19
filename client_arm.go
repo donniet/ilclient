@@ -1,8 +1,12 @@
 package ilclient
 
 /*
-#cgo CFLAGS: -Wno-unused-variable -Wall -Wno-deprecated -g -DRASPBERRY_PI -DSTANDALONE -D__STDC_CONSTANT_MACROS  -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -I/opt/vc/include/IL -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux/ -I/opt/vc/src/hello_pi/libs/ilclient
-#cgo LDFLAGS: -L /opt/vc/lib -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -L/opt/vc/src/hello_pi/libs/ilclient -lilclient -Wl,--no-whole-archive
+#cgo CFLAGS: -Wno-unused-variable -Wall -Wno-deprecated -g -DRASPBERRY_PI -DSTANDALONE -D__STDC_CONSTANT_MACROS  -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -I/opt/vc/include/IL -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux/ -I./include
+#cgo LDFLAGS: -L/opt/vc/lib -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt
+
+
+
+//-L/opt/vc/src/hello_pi/libs/ilclient -lilclient
 
 #include <OMX_Core.h>
 #include <OMX_Component.h>
@@ -79,6 +83,7 @@ import (
 	"os"
 	"sync"
 	"time"
+	"unsafe"
 )
 
 const default_timeout = 0
@@ -139,6 +144,7 @@ func init() {
 	fmt.Fprintf(os.Stderr, "OMX_Init ")
 	err := C.OMX_Init()
 	fmt.Fprintf(os.Stderr, "ret: %v\n", Error(err))
+
 }
 
 func Get() *Client {
@@ -154,7 +160,10 @@ func (c *Client) NewComponent(name string, flags ...CreateFlag) (*Component, err
 		fin = fin | C.ILCLIENT_CREATE_FLAGS_T(f)
 	}
 
+	str := C.CString(name)
+	defer C.free(unsafe.Pointer(str))
 	ret.component = C.ilclient_create_component_wrapper(c.client, &e, C.CString(name), fin)
+
 	if e != 0 {
 		return nil, fmt.Errorf("ilclient: could not create component: %v", Error(e))
 	}
