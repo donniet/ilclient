@@ -284,6 +284,16 @@ void ilclient_set_configchanged_callback(ILCLIENT_T *st, ILCLIENT_CALLBACK_T fun
    st->configchanged_callback_data = userdata;
 }
 
+const char * index2string(OMX_INDEXTYPE eIndex) {
+   switch(eIndex) {
+   case OMX_IndexParamAudioInit: return "OMX_IndexParamAudioInitcase";
+   case OMX_IndexParamVideoInit: return "OMX_IndexParamVideoInitcase";
+   case OMX_IndexParamImageInit: return "OMX_IndexParamImageInitcase";
+   case OMX_IndexParamOtherInit: return "OMX_IndexParamOtherInit";
+   default: return "UNKONWN";
+   }
+}
+
 /***********************************************************
  * Name: ilclient_create_component
  *
@@ -300,6 +310,8 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
    char component_name[128];
    int32_t status;
 
+   fprintf(stderr, "ilclient_create_component: allocating space for component\n");
+
    *comp = vcos_malloc(sizeof(COMPONENT_T), "il:comp");
    if(!*comp)
       return -1;
@@ -307,6 +319,9 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
    memset(*comp, 0, sizeof(COMPONENT_T));
 
 #define COMP_PREFIX "OMX.broadcom."
+
+
+   fprintf(stderr, "ilclient_create_component: creating flags and semaphore\n");
 
    status = vcos_event_flags_create(&(*comp)->event,"il:comp");
    vc_assert(status == VCOS_SUCCESS);
@@ -320,17 +335,27 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
 
    (*comp)->flags = flags;
 
+
+   fprintf(stderr, "ilclient_create_component: name: '%s', bufname: '%s', component_name: '%s', flags: %x\n", (*comp)->name, (*comp)->bufname, component_name, flags);
+
+   fprintf(stderr, "ilclient_create_component: setting event handlers\n");
+
    callbacks.EventHandler = ilclient_event_handler;
    callbacks.EmptyBufferDone = flags & ILCLIENT_ENABLE_INPUT_BUFFERS ? ilclient_empty_buffer_done : ilclient_empty_buffer_done_error;
    callbacks.FillBufferDone = flags & ILCLIENT_ENABLE_OUTPUT_BUFFERS ? ilclient_fill_buffer_done : ilclient_fill_buffer_done_error;
 
+
+   fprintf(stderr, "ilclient_create_component: getting component handle\n");
    error = OMX_GetHandle(&(*comp)->comp, component_name, *comp, &callbacks);
 
    if (error == OMX_ErrorNone)
    {
+      fprintf(stderr, "ilclient_create_component: component created successfully.\n");
       OMX_UUIDTYPE uid;
       char name[128];
       OMX_VERSIONTYPE compVersion, specVersion;
+
+      fprintf(stderr, "ilclient_create_component: getting component version.\n");
 
       if(OMX_GetComponentVersion((*comp)->comp, name, &compVersion, &specVersion, &uid) == OMX_ErrorNone)
       {
@@ -340,10 +365,18 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
          (*comp)->name[sizeof((*comp)->name)-1] = 0;
          vcos_snprintf((*comp)->bufname, sizeof((*comp)->bufname), "cl:%s buffer", p);
          (*comp)->bufname[sizeof((*comp)->bufname)-1] = 0;
+         
+         fprintf(stderr, "ilclient_create_component: name: '%s', bufname: '%s'\n", (*comp)->name, (*comp)->bufname);
+
       }
+
+      fprintf(stderr, "ilclient_create_component: checking buffers and ports\n");
 
       if(flags & (ILCLIENT_DISABLE_ALL_PORTS | ILCLIENT_OUTPUT_ZERO_BUFFERS))
       {
+         
+         fprintf(stderr, "ilclient_create_component: disable ports and zero buffers\n");
+
          OMX_PORT_PARAM_TYPE ports;
          OMX_INDEXTYPE types[] = {OMX_IndexParamAudioInit, OMX_IndexParamVideoInit, OMX_IndexParamImageInit, OMX_IndexParamOtherInit};
          int i;
@@ -353,6 +386,9 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
 
          for(i=0; i<4; i++)
          {
+
+            fprintf(stderr, "ilclient_create_component: getting ports of type '%s'\n", index2string(types[i]));
+
             OMX_ERRORTYPE error = OMX_GetParameter((*comp)->comp, types[i], &ports);
             if(error == OMX_ErrorNone)
             {
@@ -1369,8 +1405,8 @@ void ilclient_debug_output(char *format, ...)
    va_list args;
 
    va_start(args, format); 
-   vcos_vlog_info(format, args);
-   // fprintf(stderr, format, args);
+   // vcos_vlog_info(format, args);
+   fprintf(stderr, format, args);
    va_end(args);
 }
 
