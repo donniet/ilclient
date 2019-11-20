@@ -25,12 +25,20 @@ extern OMX_ERRORTYPE set_image_portformat(COMPONENT_T * comp, unsigned int port,
 extern OMX_ERRORTYPE get_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
 	OMX_IMAGE_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color);
 
+extern OMX_ERRORTYPE set_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
+	OMX_VIDEO_CODINGTYPE format, OMX_COLOR_FORMATTYPE color, OMX_U32 framerate);
+
+extern OMX_ERRORTYPE get_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
+	OMX_VIDEO_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color, OMX_U32 * framerate);
+
+
 */
 import "C"
 
 import (
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"sync"
 	"time"
@@ -375,6 +383,59 @@ func (c ComponentPort) GetImagePortFormat() ([]ImageFormat, error) {
 
 		if e == C.OMX_ErrorNone {
 			ret = append(ret, ImageFormat{ImagePortFormat(coding), ColorFormat(color)})
+		} else {
+			break
+		}
+	}
+
+	return ret, Error(e) // check for error when index is out of bounds and return nil
+}
+
+func toQ16(x float64) C.OMX_U32 {
+	return C.OMX_U32(math.Floor(x * 65536.))
+}
+func fromQ16(y C.OMX_U32) float64 {
+	return float64(y) / 65536.
+}
+
+type VideoFormat struct {
+	Compression VideoCoding
+	Color       ColorFormat
+	Framerate   float64
+}
+
+func (c ComponentPort) SetVideoPortFormat(formats []VideoFormat) error {
+	for i, f := range formats {
+		e := C.set_video_portformat(c.component.component, C.uint(c.port), C.uint(i),
+			C.OMX_VIDEO_CODINGTYPE(f.Compression), C.OMX_COLOR_FORMATTYPE(f.Color), toQ16(f.Framerate))
+
+		if e != C.OMX_ErrorNone {
+			return Error(e)
+		}
+	}
+
+	return nil
+}
+
+func (c ComponentPort) GetVideoPortFormat() ([]VideoFormat, error) {
+	var ret []VideoFormat
+	var e C.OMX_ERRORTYPE
+
+	for i := uint(0); true; i++ {
+		var coding C.OMX_VIDEO_CODINGTYPE
+		var color C.OMX_COLOR_FORMATTYPE
+		var framerate C.OMX_U32
+
+		fmt.Fprintf(os.Stderr, "getting image format: %s: %d\n", c.port, int(c.port))
+		e = C.get_video_portformat(c.component.component, C.uint(c.port), C.uint(i),
+			&coding, &color, &framerate)
+
+		if e == C.OMX_ErrorNone {
+			ret = append(ret, VideoFormat{
+				VideoCoding(coding),
+				ColorFormat(color),
+				fromQ16(framerate),
+			})
 		} else {
 			break
 		}

@@ -81,28 +81,30 @@ OMX_ERRORTYPE get_image_portformat(COMPONENT_T * comp, unsigned int port, unsign
 }
 
 OMX_ERRORTYPE set_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-    OMX_IMAGE_CODINGTYPE format, OMX_COLOR_FORMATTYPE color) 
+    OMX_VIDEO_CODINGTYPE format, OMX_COLOR_FORMATTYPE color, OMX_U32 framerate) 
 {
-    OMX_IMAGE_PARAM_PORTFORMATTYPE param;
+    OMX_VIDEO_PARAM_PORTFORMATTYPE param;
     OMX_INIT_STRUCTURE(param);
     param.nIndex = index;
     param.nPortIndex = port;
     param.eCompressionFormat = format;
     param.eColorFormat = color;
+    param.xFramerate = framerate;
 
-    return OMX_SetParameter(ilclient_get_handle(comp), OMX_IndexParamImagePortFormat, &param);
+    return OMX_SetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoPortFormat, &param);
 }
 
 OMX_ERRORTYPE get_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-	OMX_IMAGE_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color) 
+	OMX_VIDEO_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color, OMX_U32 * framerate) 
 {
-    OMX_IMAGE_PARAM_PORTFORMATTYPE param;
+    OMX_VIDEO_PARAM_PORTFORMATTYPE param;
     OMX_INIT_STRUCTURE(param);
 
-    OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamImagePortFormat, &param);
+    OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoPortFormat, &param);
     if (e == OMX_ErrorNone) {
         if (format != NULL) *format = param.eCompressionFormat;
         if (color != NULL) *color = param.eColorFormat;
+        if (framerate != NULL) *framerate = param.xFramerate;
     }
 
     return e;
