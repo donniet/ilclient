@@ -816,6 +816,36 @@ func (c ComponentPort) GetVideoH263() (ret VideoH263, err error) {
 	return
 }
 
+type H263ProfileLevel struct {
+	Profile VideoH263Profile
+	Level   VideoH263Level
+}
+
+func (c ComponentPort) SupportedH263ProfileLevels() (ret []H263ProfileLevel, err error) {
+	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
+	var e C.OMX_ERRORTYPE
+
+	for i := uint(0); ; i++ {
+		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+		p.nPortIndex = C.OMX_U32(c.port)
+		p.nProfileIndex = C.OMX_U32(i)
+
+		e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
+		if e != C.OMX_ErrorNone {
+			break
+		}
+		ret = append(ret, H263ProfileLevel{
+			Profile: VideoH263Profile(p.eProfile),
+			Level:   VideoH263Level(p.eLevel),
+		})
+	}
+
+	if e != C.OMX_ErrorNoMore {
+		err = Error(e)
+	}
+	return
+}
+
 type VideoMPEG2 struct {
 	PFrames uint
 	BFrames uint
@@ -854,6 +884,36 @@ func (c ComponentPort) GetVideoMPEG2() (ret VideoMPEG2, err error) {
 	ret.BFrames = uint(p.nBFrames)
 	ret.Profile = VideoMPEG2Profile(p.eProfile)
 	ret.Level = VideoMPEG2Level(p.eLevel)
+	return
+}
+
+type MPEG2ProfileLevel struct {
+	Profile VideoMPEG2Profile
+	Level   VideoMPEG2Level
+}
+
+func (c ComponentPort) SupportedMPEG2ProfileLevels() (ret []MPEG2ProfileLevel, err error) {
+	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
+	var e C.OMX_ERRORTYPE
+
+	for i := uint(0); ; i++ {
+		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+		p.nPortIndex = C.OMX_U32(c.port)
+		p.nProfileIndex = C.OMX_U32(i)
+
+		e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
+		if e != C.OMX_ErrorNone {
+			break
+		}
+		ret = append(ret, MPEG2ProfileLevel{
+			Profile: VideoMPEG2Profile(p.eProfile),
+			Level:   VideoMPEG2Level(p.eLevel),
+		})
+	}
+
+	if e != C.OMX_ErrorNoMore {
+		err = Error(e)
+	}
 	return
 }
 
@@ -919,6 +979,36 @@ func (c ComponentPort) GetVideoMPEG4() (ret VideoMPEG4, err error) {
 	ret.Level = VideoMPEG4Level(p.eLevel)
 	ret.AllowedPictureTypes = uint(p.nAllowedPictureTypes)
 	ret.ReversibleVLC = (p.bReversibleVLC != C.OMX_FALSE)
+	return
+}
+
+type MPEG4ProfileLevel struct {
+	Profile VideoMPEG4Profile
+	Level   VideoMPEG4Level
+}
+
+func (c ComponentPort) SupportedMPEG4ProfileLevels() (ret []MPEG4ProfileLevel, err error) {
+	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
+	var e C.OMX_ERRORTYPE
+
+	for i := uint(0); ; i++ {
+		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+		p.nPortIndex = C.OMX_U32(c.port)
+		p.nProfileIndex = C.OMX_U32(i)
+
+		e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
+		if e != C.OMX_ErrorNone {
+			break
+		}
+		ret = append(ret, MPEG4ProfileLevel{
+			Profile: VideoMPEG4Profile(p.eProfile),
+			Level:   VideoMPEG4Level(p.eLevel),
+		})
+	}
+
+	if e != C.OMX_ErrorNoMore {
+		err = Error(e)
+	}
 	return
 }
 
@@ -1010,5 +1100,137 @@ func (c ComponentPort) GetVideoRV() (ret VideoRV, err error) {
 	ret.EnableTemporalInterpolation = (p.bEnableTemporalInterpolation != C.OMX_FALSE)
 	ret.EnableLatencyMode = (p.bEnableLatencyMode != C.OMX_FALSE)
 
+	return
+}
+
+type VideoAVC struct {
+	SliceHeaderSpacing       uint
+	PFrames                  uint
+	BFrames                  uint
+	UseHadamard              bool
+	RefFrames                uint
+	RefIdx10ActiveMinus1     uint
+	RefIdx11ActiveMinus1     uint
+	EnableUEP                bool
+	EnableFMO                bool
+	EnableASO                bool
+	EnableRS                 bool
+	Profile                  VideoAVCProfile
+	Level                    VideoAVCLevel
+	AllowedPictureTypes      uint
+	FrameMBsOnly             bool
+	MBAFF                    bool
+	EntropyCodingCABAC       bool
+	WeightedPPrediction      bool
+	WeightedBipredicitonMode uint
+	constIpred               bool
+	Direct8x8Inference       bool
+	DirectSpatialTemporal    bool
+	CabacInitIdc             uint
+	LoopFilterMode           VideoAVCLoopFilter
+}
+
+func (c ComponentPort) SetVideoAVC(v VideoAVC) error {
+	var p C.OMX_VIDEO_PARAM_AVCTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.nSliceHeaderSpacing = C.OMX_U32(v.SliceHeaderSpacing)
+	p.nPFrames = C.OMX_U32(v.PFrames)
+	p.nBFrames = C.OMX_U32(v.BFrames)
+	p.bUseHadamard = toOMXBool(v.UseHadamard)
+	p.nRefFrames = C.OMX_U32(v.RefFrames)
+	p.nRefIdx10ActiveMinus1 = C.OMX_U32(v.RefIdx10ActiveMinus1)
+	p.nRefIdx11ActiveMinus1 = C.OMX_U32(v.RefIdx11ActiveMinus1)
+	p.bEnableUEP = toOMXBool(v.EnableUEP)
+	p.bEnableFMO = toOMXBool(v.EnableFMO)
+	p.bEnableASO = toOMXBool(v.EnableASO)
+	p.bEnableRS = toOMXBool(v.EnableRS)
+	p.eProfile = C.OMX_VIDEO_AVCPROFILETYPE(v.Profile)
+	p.eLevel = C.OMX_VIDEO_AVCLEVELTYPE(v.Level)
+	p.nAllowedPictureTypes = C.OMX_U32(v.AllowedPictureTypes)
+	p.bFrameMBsOnly = toOMXBool(v.FrameMBsOnly)
+	p.bMBAFF = toOMXBool(v.MBAFF)
+	p.bEntropyCodingCABAC = toOMXBool(v.EntropyCodingCABAC)
+	p.bWeightedPPrediction = toOMXBool(v.WeightedPPrediction)
+	p.nWeightedBipredicitonMode = C.OMX_U32(v.WeightedBipredicitonMode)
+	p.bconstIpred = toOMXBool(v.constIpred)
+	p.bDirect8x8Inference = toOMXBool(v.Direct8x8Inference)
+	p.bDirectSpatialTemporal = toOMXBool(v.DirectSpatialTemporal)
+	p.nCabacInitIdc = C.OMX_U32(v.CabacInitIdc)
+	p.eLoopFilterMode = C.OMX_VIDEO_AVCLOOPFILTERTYPE(v.LoopFilterMode)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoAvc, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoAVC() (v VideoAVC, err error) {
+	var p C.OMX_VIDEO_PARAM_AVCTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoAvc, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	v.SliceHeaderSpacing = uint(p.nSliceHeaderSpacing)
+	v.PFrames = uint(p.nPFrames)
+	v.BFrames = uint(p.nBFrames)
+	v.UseHadamard = (p.bUseHadamard != C.OMX_FALSE)
+	v.RefFrames = uint(p.nRefFrames)
+	v.RefIdx10ActiveMinus1 = uint(p.nRefIdx10ActiveMinus1)
+	v.RefIdx11ActiveMinus1 = uint(p.nRefIdx11ActiveMinus1)
+	v.EnableUEP = (p.bEnableUEP != C.OMX_FALSE)
+	v.EnableFMO = (p.bEnableFMO != C.OMX_FALSE)
+	v.EnableASO = (p.bEnableASO != C.OMX_FALSE)
+	v.EnableRS = (p.bEnableRS != C.OMX_FALSE)
+	v.Profile = VideoAVCProfile(p.eProfile)
+	v.Level = VideoAVCLevel(p.eLevel)
+	v.AllowedPictureTypes = uint(p.nAllowedPictureTypes)
+	v.FrameMBsOnly = (p.bFrameMBsOnly != C.OMX_FALSE)
+	v.MBAFF = (p.bMBAFF != C.OMX_FALSE)
+	v.EntropyCodingCABAC = (p.bEntropyCodingCABAC != C.OMX_FALSE)
+	v.WeightedPPrediction = (p.bWeightedPPrediction != C.OMX_FALSE)
+	v.WeightedBipredicitonMode = uint(p.nWeightedBipredicitonMode)
+	v.constIpred = (p.bconstIpred != C.OMX_FALSE)
+	v.Direct8x8Inference = (p.bDirect8x8Inference != C.OMX_FALSE)
+	v.DirectSpatialTemporal = (p.bDirectSpatialTemporal != C.OMX_FALSE)
+	v.CabacInitIdc = uint(p.nCabacInitIdc)
+	v.LoopFilterMode = VideoAVCLoopFilter(p.eLoopFilterMode)
+
+	return
+}
+
+type AVCProfileLevel struct {
+	Profile VideoAVCProfile
+	Level   VideoAVCLevel
+}
+
+func (c ComponentPort) SupportedAVCProfileLevels() (ret []AVCProfileLevel, err error) {
+	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
+	var e C.OMX_ERRORTYPE
+
+	for i := uint(0); ; i++ {
+		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+		p.nPortIndex = C.OMX_U32(c.port)
+		p.nProfileIndex = C.OMX_U32(i)
+
+		e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
+		if e != C.OMX_ErrorNone {
+			break
+		}
+		ret = append(ret, AVCProfileLevel{
+			Profile: VideoAVCProfile(p.eProfile),
+			Level:   VideoAVCLevel(p.eLevel),
+		})
+	}
+
+	if e != C.OMX_ErrorNoMore {
+		err = Error(e)
+	}
 	return
 }

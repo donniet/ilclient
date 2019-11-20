@@ -1052,3 +1052,144 @@ func (v VideoRVFormat) String() string {
 	}
 	return fmt.Sprintf("UNKNOWN[%d]", int(v))
 }
+
+type VideoAVCProfile C.OMX_VIDEO_AVCPROFILETYPE
+
+const (
+	VideoAVCProfileBaseline            VideoAVCProfile = C.OMX_VIDEO_AVCProfileBaseline
+	VideoAVCProfileMain                VideoAVCProfile = C.OMX_VIDEO_AVCProfileMain
+	VideoAVCProfileExtended            VideoAVCProfile = C.OMX_VIDEO_AVCProfileExtended
+	VideoAVCProfileHigh                VideoAVCProfile = C.OMX_VIDEO_AVCProfileHigh
+	VideoAVCProfileHigh10              VideoAVCProfile = C.OMX_VIDEO_AVCProfileHigh10
+	VideoAVCProfileHigh422             VideoAVCProfile = C.OMX_VIDEO_AVCProfileHigh422
+	VideoAVCProfileHigh444             VideoAVCProfile = C.OMX_VIDEO_AVCProfileHigh444
+	VideoAVCProfileConstrainedBaseline VideoAVCProfile = C.OMX_VIDEO_AVCProfileConstrainedBaseline
+	VideoAVCProfileKhronosExtensions   VideoAVCProfile = C.OMX_VIDEO_AVCProfileKhronosExtensions
+	VideoAVCProfileVendorStartUnused   VideoAVCProfile = C.OMX_VIDEO_AVCProfileVendorStartUnused
+	VideoAVCProfileMax                 VideoAVCProfile = C.OMX_VIDEO_AVCProfileMax
+)
+
+func (v VideoAVCProfile) String() string {
+	switch v {
+	case VideoAVCProfileBaseline:
+		return "VideoAVCProfileBaseline"
+	case VideoAVCProfileMain:
+		return "VideoAVCProfileMain"
+	case VideoAVCProfileExtended:
+		return "VideoAVCProfileExtended"
+	case VideoAVCProfileHigh:
+		return "VideoAVCProfileHigh"
+	case VideoAVCProfileHigh10:
+		return "VideoAVCProfileHigh10"
+	case VideoAVCProfileHigh422:
+		return "VideoAVCProfileHigh422"
+	case VideoAVCProfileHigh444:
+		return "VideoAVCProfileHigh444"
+	case VideoAVCProfileConstrainedBaseline:
+		return "VideoAVCProfileConstrainedBaseline"
+	case VideoAVCProfileKhronosExtensions:
+		return "VideoAVCProfileKhronosExtensions"
+	case VideoAVCProfileVendorStartUnused:
+		return "VideoAVCProfileVendorStartUnused"
+	case VideoAVCProfileMax:
+		return "VideoAVCProfileMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoAVCLevel C.OMX_VIDEO_AVCLEVELTYPE
+
+const (
+	VideoAVCLevel1                 VideoAVCLevel = C.OMX_VIDEO_AVCLevel1
+	VideoAVCLevel1b                VideoAVCLevel = C.OMX_VIDEO_AVCLevel1b
+	VideoAVCLevel11                VideoAVCLevel = C.OMX_VIDEO_AVCLevel11
+	VideoAVCLevel12                VideoAVCLevel = C.OMX_VIDEO_AVCLevel12
+	VideoAVCLevel13                VideoAVCLevel = C.OMX_VIDEO_AVCLevel13
+	VideoAVCLevel2                 VideoAVCLevel = C.OMX_VIDEO_AVCLevel2
+	VideoAVCLevel21                VideoAVCLevel = C.OMX_VIDEO_AVCLevel21
+	VideoAVCLevel22                VideoAVCLevel = C.OMX_VIDEO_AVCLevel22
+	VideoAVCLevel3                 VideoAVCLevel = C.OMX_VIDEO_AVCLevel3
+	VideoAVCLevel31                VideoAVCLevel = C.OMX_VIDEO_AVCLevel31
+	VideoAVCLevel32                VideoAVCLevel = C.OMX_VIDEO_AVCLevel32
+	VideoAVCLevel4                 VideoAVCLevel = C.OMX_VIDEO_AVCLevel4
+	VideoAVCLevel41                VideoAVCLevel = C.OMX_VIDEO_AVCLevel41
+	VideoAVCLevel42                VideoAVCLevel = C.OMX_VIDEO_AVCLevel42
+	VideoAVCLevel5                 VideoAVCLevel = C.OMX_VIDEO_AVCLevel5
+	VideoAVCLevel51                VideoAVCLevel = C.OMX_VIDEO_AVCLevel51
+	VideoAVCLevelKhronosExtensions VideoAVCLevel = C.OMX_VIDEO_AVCLevelKhronosExtensions
+	VideoAVCLevelVendorStartUnused VideoAVCLevel = C.OMX_VIDEO_AVCLevelVendorStartUnused
+	VideoAVCLevelMax               VideoAVCLevel = C.OMX_VIDEO_AVCLevelMax
+)
+
+func (v VideoAVCLevel) String() string {
+	switch v {
+	case VideoAVCLevel1:
+		return "VideoAVCLevel1"
+	case VideoAVCLevel1b:
+		return "VideoAVCLevel1b"
+	case VideoAVCLevel11:
+		return "VideoAVCLevel11"
+	case VideoAVCLevel12:
+		return "VideoAVCLevel12"
+	case VideoAVCLevel13:
+		return "VideoAVCLevel13"
+	case VideoAVCLevel2:
+		return "VideoAVCLevel2"
+	case VideoAVCLevel21:
+		return "VideoAVCLevel21"
+	case VideoAVCLevel22:
+		return "VideoAVCLevel22"
+	case VideoAVCLevel3:
+		return "VideoAVCLevel3"
+	case VideoAVCLevel31:
+		return "VideoAVCLevel31"
+	case VideoAVCLevel32:
+		return "VideoAVCLevel32"
+	case VideoAVCLevel4:
+		return "VideoAVCLevel4"
+	case VideoAVCLevel41:
+		return "VideoAVCLevel41"
+	case VideoAVCLevel42:
+		return "VideoAVCLevel42"
+	case VideoAVCLevel5:
+		return "VideoAVCLevel5"
+	case VideoAVCLevel51:
+		return "VideoAVCLevel51"
+	case VideoAVCLevelKhronosExtensions:
+		return "VideoAVCLevelKhronosExtensions"
+	case VideoAVCLevelVendorStartUnused:
+		return "VideoAVCLevelVendorStartUnused"
+	case VideoAVCLevelMax:
+		return "VideoAVCLevelMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoAVCLoopFilter C.OMX_VIDEO_AVCLOOPFILTERTYPE
+
+const (
+	VideoAVCLoopFilterEnable               VideoAVCLoopFilter = C.OMX_VIDEO_AVCLoopFilterEnable
+	VideoAVCLoopFilterDisable              VideoAVCLoopFilter = C.OMX_VIDEO_AVCLoopFilterDisable
+	VideoAVCLoopFilterDisableSliceBoundary VideoAVCLoopFilter = C.OMX_VIDEO_AVCLoopFilterDisableSliceBoundary
+	VideoAVCLoopFilterKhronosExtensions    VideoAVCLoopFilter = C.OMX_VIDEO_AVCLoopFilterKhronosExtensions
+	VideoAVCLoopFilterVendorStartUnused    VideoAVCLoopFilter = C.OMX_VIDEO_AVCLoopFilterVendorStartUnused
+	VideoAVCLoopFilterMax                  VideoAVCLoopFilter = C.OMX_VIDEO_AVCLoopFilterMax
+)
+
+func (v VideoAVCLoopFilter) String() string {
+	switch v {
+	case VideoAVCLoopFilterEnable:
+		return "VideoAVCLoopFilterEnable"
+	case VideoAVCLoopFilterDisable:
+		return "VideoAVCLoopFilterDisable"
+	case VideoAVCLoopFilterDisableSliceBoundary:
+		return "VideoAVCLoopFilterDisableSliceBoundary"
+	case VideoAVCLoopFilterKhronosExtensions:
+		return "VideoAVCLoopFilterKhronosExtensions"
+	case VideoAVCLoopFilterVendorStartUnused:
+		return "VideoAVCLoopFilterVendorStartUnused"
+	case VideoAVCLoopFilterMax:
+		return "VideoAVCLoopFilterMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
