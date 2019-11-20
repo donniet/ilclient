@@ -66,6 +66,7 @@ typedef struct _ILEVENT_T ILEVENT_T;
 
 struct _COMPONENT_T;
 
+
 /**
  * The <DFN>COMPONENT_T</DFN> structure represents an IL component,
  * together with the necessary extra information required by the IL
@@ -236,6 +237,23 @@ typedef enum {
                                             if supported by the component. */                                            
 } ILCLIENT_CREATE_FLAGS_T;
   
+
+
+typedef struct _COMPONENT_T {
+   OMX_HANDLETYPE comp;
+   ILCLIENT_CREATE_FLAGS_T flags;
+   VCOS_SEMAPHORE_T sema;
+   VCOS_EVENT_FLAGS_T event;
+   struct _COMPONENT_T *related;
+   OMX_BUFFERHEADERTYPE *out_list;
+   OMX_BUFFERHEADERTYPE *in_list;
+   char name[32];
+   char bufname[32];
+   unsigned int error_mask;
+   unsigned int private;
+   ILEVENT_T *list;
+   ILCLIENT_T *client;
+} COMPONENT_T;
 
 /**
  * \brief This structure represents a tunnel in the OpenMAX IL API.

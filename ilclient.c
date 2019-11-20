@@ -94,21 +94,21 @@ struct _ILCLIENT_T {
    void *configchanged_callback_data;
 };
 
-struct _COMPONENT_T {
-   OMX_HANDLETYPE comp;
-   ILCLIENT_CREATE_FLAGS_T flags;
-   VCOS_SEMAPHORE_T sema;
-   VCOS_EVENT_FLAGS_T event;
-   struct _COMPONENT_T *related;
-   OMX_BUFFERHEADERTYPE *out_list;
-   OMX_BUFFERHEADERTYPE *in_list;
-   char name[32];
-   char bufname[32];
-   unsigned int error_mask;
-   unsigned int private;
-   ILEVENT_T *list;
-   ILCLIENT_T *client;
-};
+// struct _COMPONENT_T {
+//    OMX_HANDLETYPE comp;
+//    ILCLIENT_CREATE_FLAGS_T flags;
+//    VCOS_SEMAPHORE_T sema;
+//    VCOS_EVENT_FLAGS_T event;
+//    struct _COMPONENT_T *related;
+//    OMX_BUFFERHEADERTYPE *out_list;
+//    OMX_BUFFERHEADERTYPE *in_list;
+//    char name[32];
+//    char bufname[32];
+//    unsigned int error_mask;
+//    unsigned int private;
+//    ILEVENT_T *list;
+//    ILCLIENT_T *client;
+// };
 
 #define random_wait()
 static char *states[] = {"Invalid", "Loaded", "Idle", "Executing", "Pause", "WaitingForResources"};

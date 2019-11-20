@@ -70,6 +70,8 @@ OMX_ERRORTYPE get_image_portformat(COMPONENT_T * comp, unsigned int port, unsign
 {
     OMX_IMAGE_PARAM_PORTFORMATTYPE param;
     OMX_INIT_STRUCTURE(param);
+    param.nPortIndex = port;
+    param.nIndex = index;
 
     OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamImagePortFormat, &param);
     if (e == OMX_ErrorNone) {
@@ -99,6 +101,10 @@ OMX_ERRORTYPE get_video_portformat(COMPONENT_T * comp, unsigned int port, unsign
 {
     OMX_VIDEO_PARAM_PORTFORMATTYPE param;
     OMX_INIT_STRUCTURE(param);
+    param.nPortIndex = port;
+    param.nIndex = index;
+
+    fprintf(stderr, "vid format: component: %s, port: %d, index: %d\n", comp->name, port, index);
 
     OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoPortFormat, &param);
     if (e == OMX_ErrorNone) {

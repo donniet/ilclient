@@ -317,23 +317,23 @@ func (c *Component) Port(port_index PortIndex) ComponentPort {
 	return ComponentPort{c, port_index}
 }
 
-func (c *Component) EnablePort(port_index PortIndex) {
-	C.ilclient_enable_port(c.component, C.int(port_index))
+func (c ComponentPort) Enable() {
+	C.ilclient_enable_port(c.component.component, C.int(c.port))
 }
 
-func (c *Component) DisablePort(port_index PortIndex) {
-	C.ilclient_disable_port(c.component, C.int(port_index))
+func (c ComponentPort) Disable() {
+	C.ilclient_disable_port(c.component.component, C.int(c.port))
 }
 
-func (c *Component) EnablePortBuffers(port_index PortIndex) error {
-	if e := C.ilclient_enable_port_buffers(c.component, C.int(port_index), nil, nil, nil); e != 0 {
+func (c ComponentPort) EnableBuffers() error {
+	if e := C.ilclient_enable_port_buffers(c.component.component, C.int(c.port), nil, nil, nil); e != 0 {
 		return fmt.Errorf("error: EnablePortBuffers: %v", Error(e))
 	}
 	return nil
 }
 
-func (c *Component) DisablePortBuffers(port_index PortIndex) {
-	C.ilclient_disable_port_buffers(c.component, C.int(port_index), nil, nil, nil)
+func (c ComponentPort) DisableBuffers() {
+	C.ilclient_disable_port_buffers(c.component.component, C.int(c.port), nil, nil, nil)
 }
 
 func (t *Tunnel) Close() {
@@ -388,7 +388,10 @@ func (c ComponentPort) GetImagePortFormat() ([]ImageFormat, error) {
 		}
 	}
 
-	return ret, Error(e) // check for error when index is out of bounds and return nil
+	if e == C.OMX_ErrorNoMore {
+		return ret, nil
+	}
+	return ret, Error(e)
 }
 
 func toQ16(x float64) C.OMX_U32 {
@@ -440,6 +443,9 @@ func (c ComponentPort) GetVideoPortFormat() ([]VideoFormat, error) {
 			break
 		}
 	}
-
-	return ret, Error(e) // check for error when index is out of bounds and return nil
+	
+	if e == C.OMX_ErrorNoMore {
+		return ret, nil
+	}
+	return ret, Error(e)
 }
