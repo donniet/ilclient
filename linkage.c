@@ -104,8 +104,6 @@ OMX_ERRORTYPE get_video_portformat(COMPONENT_T * comp, unsigned int port, unsign
     param.nPortIndex = port;
     param.nIndex = index;
 
-    fprintf(stderr, "vid format: component: %s, port: %d, index: %d\n", comp->name, port, index);
-
     OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoPortFormat, &param);
     if (e == OMX_ErrorNone) {
         if (format != NULL) *format = param.eCompressionFormat;
@@ -113,6 +111,35 @@ OMX_ERRORTYPE get_video_portformat(COMPONENT_T * comp, unsigned int port, unsign
         if (framerate != NULL) *framerate = param.xFramerate;
     }
 
+    return e;
+}
+
+OMX_ERRORTYPE set_video_quantization(COMPONENT_T * comp, unsigned int port, 
+    OMX_U32 nQpI, OMX_U32 nQpP, OMX_U32 nQpB) 
+{
+    OMX_VIDEO_PARAM_QUANTIZATIONTYPE param;
+    OMX_INIT_STRUCTURE(param);
+    param.nPortIndex = port;
+    param.nQpI = nQpI;
+    param.nQpP = nQpP;
+    param.nQpB = nQpB;
+
+    return OMX_SetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoQuantization, &param);
+}
+
+OMX_ERRORTYPE get_video_quantization(COMPONENT_T * comp, unsigned int port, 
+    OMX_U32 * nQpI, OMX_U32 * nQpP, OMX_U32 * nQpB) 
+{
+    OMX_VIDEO_PARAM_QUANTIZATIONTYPE param;
+    OMX_INIT_STRUCTURE(param);
+    param.nPortIndex = port;
+
+    OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoQuantization, &param);
+    if (e == OMX_ErrorNone) {
+        if (nQpI != NULL) *nQpI = param.nQpI;
+        if (nQpP != NULL) *nQpP = param.nQpP;
+        if (nQpB != NULL) *nQpB = param.nQpB;
+    }
     return e;
 }
 

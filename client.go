@@ -21,17 +21,16 @@ extern int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state);
 
 extern OMX_ERRORTYPE set_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
 	OMX_IMAGE_CODINGTYPE format, OMX_COLOR_FORMATTYPE color);
-
 extern OMX_ERRORTYPE get_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
 	OMX_IMAGE_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color);
-
 extern OMX_ERRORTYPE set_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
 	OMX_VIDEO_CODINGTYPE format, OMX_COLOR_FORMATTYPE color, OMX_U32 framerate);
-
 extern OMX_ERRORTYPE get_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
 	OMX_VIDEO_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color, OMX_U32 * framerate);
-
-
+extern OMX_ERRORTYPE set_video_quantization(COMPONENT_T * comp, unsigned int port, 
+	OMX_U32 nQpI, OMX_U32 nQpP, OMX_U32 nQpB);
+extern OMX_ERRORTYPE get_video_quantization(COMPONENT_T * comp, unsigned int port, 
+    OMX_U32 * nQpI, OMX_U32 * nQpP, OMX_U32 * nQpB);
 */
 import "C"
 
@@ -429,7 +428,6 @@ func (c ComponentPort) GetVideoPortFormat() ([]VideoFormat, error) {
 		var color C.OMX_COLOR_FORMATTYPE
 		var framerate C.OMX_U32
 
-		fmt.Fprintf(os.Stderr, "getting image format: %s: %d\n", c.port, int(c.port))
 		e = C.get_video_portformat(c.component.component, C.uint(c.port), C.uint(i),
 			&coding, &color, &framerate)
 
@@ -449,3 +447,39 @@ func (c ComponentPort) GetVideoPortFormat() ([]VideoFormat, error) {
 	}
 	return ret, Error(e)
 }
+
+type VideoQuantization struct {
+	QpI uint
+	QpP uint
+	QpB uint
+}
+
+func (c ComponentPort) SetVideoQuantization(q VideoQuantization) error {
+	if e := C.set_video_quantization(c.component.component, C.uint(c.port),
+		C.OMX_U32(q.QpI), C.OMX_U32(q.QpP), C.OMX_U32(q.QpB));
+		e != C.OMX_ErrorNone {
+
+		return Error(e)
+	}
+	return nil
+} 
+
+func (c ComponentPort) GetVideoQuantization() (VideoQuantization, error) {
+	var nQpI, nQpP, nQpB C.OMX_U32
+
+	ret := VideoQuantization{}
+
+	if e := C.get_video_quantization(c.component.component, C.uint(c.port),
+		&nQpI, &nQpP, &nQpB);
+		e != C.OMX_ErrorNone {
+
+		return ret, Error(e)
+	}
+	ret.QpI = uint(nQpI)
+	ret.QpP = uint(nQpP)
+	ret.QpB = uint(nQpB)
+
+	return ret, nil
+} 
+
+
