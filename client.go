@@ -621,3 +621,238 @@ func (c ComponentPort) GetVideoMotionVector() (ret VideoMotionVector, err error)
 	ret.YSearchRange = int(p.sYSearchRange)
 	return
 }
+
+type VideoIntraRefresh struct {
+	Mode   VideoIntraRefreshMode
+	AirMBs uint
+	AirRef uint
+	CirMBs uint
+	PirMBs uint
+}
+
+func (c ComponentPort) SetVideoIntraRefresh(v VideoIntraRefresh) error {
+	var p C.OMX_VIDEO_PARAM_INTRAREFRESHTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.eRefreshMode = C.OMX_VIDEO_INTRAREFRESHTYPE(v.Mode)
+	p.nAirMBs = C.OMX_U32(v.AirMBs)
+	p.nAirRef = C.OMX_U32(v.AirRef)
+	p.nCirMBs = C.OMX_U32(v.CirMBs)
+	p.nPirMBs = C.OMX_U32(v.PirMBs)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoIntraRefresh, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoIntraRefresh() (ret VideoIntraRefresh, err error) {
+	var p C.OMX_VIDEO_PARAM_INTRAREFRESHTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoIntraRefresh, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.Mode = VideoIntraRefreshMode(p.eRefreshMode)
+	ret.AirMBs = uint(p.nAirMBs)
+	ret.AirRef = uint(p.nAirRef)
+	ret.CirMBs = uint(p.nCirMBs)
+	ret.PirMBs = uint(p.nPirMBs)
+	return
+}
+
+type VideoErrorCorrection struct {
+	EnableHEC              bool
+	EnableResync           bool
+	ResynchMarkerSpacing   uint
+	EnableDataPartitioning bool
+	EnableRVLC             bool
+}
+
+func (c ComponentPort) SetVideoErrorCorrection(v VideoErrorCorrection) error {
+	var p C.OMX_VIDEO_PARAM_ERRORCORRECTIONTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.bEnableHEC = toOMXBool(v.EnableHEC)
+	p.bEnableResync = toOMXBool(v.EnableResync)
+	p.nResynchMarkerSpacing = C.OMX_U32(v.ResynchMarkerSpacing)
+	p.bEnableDataPartitioning = toOMXBool(v.EnableDataPartitioning)
+	p.bEnableRVLC = toOMXBool(v.EnableRVLC)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoErrorCorrection, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoErrorCorrection() (ret VideoErrorCorrection, err error) {
+	var p C.OMX_VIDEO_PARAM_ERRORCORRECTIONTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoErrorCorrection, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.EnableHEC = (p.bEnableHEC != C.OMX_FALSE)
+	ret.EnableResync = (p.bEnableResync != C.OMX_FALSE)
+	ret.ResynchMarkerSpacing = uint(p.nResynchMarkerSpacing)
+	ret.EnableDataPartitioning = (p.bEnableDataPartitioning != C.OMX_FALSE)
+	ret.EnableRVLC = (p.bEnableRVLC != C.OMX_FALSE)
+	return
+}
+
+type VideoVariableBlockSizeMotionCompensation struct {
+	B16x16 bool
+	B16x8  bool
+	B8x16  bool
+	B8x8   bool
+	B8x4   bool
+	B4x8   bool
+	B4x4   bool
+}
+
+func (c ComponentPort) SetVideoVBSMC(v VideoVariableBlockSizeMotionCompensation) error {
+	var p C.OMX_VIDEO_PARAM_VBSMCTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.b16x16 = toOMXBool(v.B16x16)
+	p.b16x8 = toOMXBool(v.B16x8)
+	p.b8x16 = toOMXBool(v.B8x16)
+	p.b8x8 = toOMXBool(v.B8x8)
+	p.b8x4 = toOMXBool(v.B8x4)
+	p.b4x8 = toOMXBool(v.B16x16)
+	p.b4x4 = toOMXBool(v.B16x16)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoVBSMC, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoVBSMC() (ret VideoVariableBlockSizeMotionCompensation, err error) {
+	var p C.OMX_VIDEO_PARAM_VBSMCTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoVBSMC, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.B16x16 = (p.b16x16 != C.OMX_FALSE)
+	ret.B16x8 = (p.b16x8 != C.OMX_FALSE)
+	ret.B8x16 = (p.b8x16 != C.OMX_FALSE)
+	ret.B8x8 = (p.b8x8 != C.OMX_FALSE)
+	ret.B8x4 = (p.b8x4 != C.OMX_FALSE)
+	ret.B4x8 = (p.b4x8 != C.OMX_FALSE)
+	ret.B4x4 = (p.b4x4 != C.OMX_FALSE)
+	return
+}
+
+type VideoH263 struct {
+	PFrames                 uint
+	BFrames                 uint
+	Profile                 VideoH263Profile
+	Level                   VideoH263Level
+	PLUSPTYPEAllowed        bool
+	AllowedPictureTypes     uint
+	ForceRoundingTypeToZero bool
+	PictureHeaderRepetition uint
+	GOBHeaderInterval       uint
+}
+
+func (c ComponentPort) SetVideoH263(v VideoH263) error {
+	var p C.OMX_VIDEO_PARAM_H263TYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.nPFrames = C.OMX_U32(v.PFrames)
+	p.nBFrames = C.OMX_U32(v.BFrames)
+	p.eProfile = C.OMX_VIDEO_H263PROFILETYPE(v.Profile)
+	p.eLevel = C.OMX_VIDEO_H263LEVELTYPE(v.Level)
+	p.bPLUSPTYPEAllowed = toOMXBool(v.PLUSPTYPEAllowed)
+	p.nAllowedPictureTypes = C.OMX_U32(v.AllowedPictureTypes)
+	p.bForceRoundingTypeToZero = toOMXBool(v.ForceRoundingTypeToZero)
+	p.nPictureHeaderRepetition = C.OMX_U32(v.PictureHeaderRepetition)
+	p.nGOBHeaderInterval = C.OMX_U32(v.GOBHeaderInterval)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoH263, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoH263() (ret VideoH263, err error) {
+	var p C.OMX_VIDEO_PARAM_H263TYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoH263, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.PFrames = uint(p.nPFrames)
+	ret.BFrames = uint(p.nBFrames)
+	ret.Profile = VideoH263Profile(p.eProfile)
+	ret.Level = VideoH263Level(p.eLevel)
+	ret.PLUSPTYPEAllowed = (p.bPLUSPTYPEAllowed != C.OMX_FALSE)
+	ret.AllowedPictureTypes = uint(p.nAllowedPictureTypes)
+	ret.ForceRoundingTypeToZero = (p.bForceRoundingTypeToZero != C.OMX_FALSE)
+	ret.PictureHeaderRepetition = uint(p.nPictureHeaderRepetition)
+	ret.GOBHeaderInterval = uint(p.nGOBHeaderInterval)
+	return
+}
+
+type VideoMPEG2 struct {
+	PFrames uint
+	BFrames uint
+	Profile VideoMPEG2Profile
+	Level   VideoMPEG2Level
+}
+
+func (c ComponentPort) SetVideoMPEG2(v VideoMPEG2) error {
+	var p C.OMX_VIDEO_PARAM_MPEG2TYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.nPFrames = C.OMX_U32(v.PFrames)
+	p.nBFrames = C.OMX_U32(v.BFrames)
+	p.eProfile = C.OMX_VIDEO_MPEG2PROFILETYPE(v.Profile)
+	p.eLevel = C.OMX_VIDEO_MPEG2LEVELTYPE(v.Level)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoMPEG2, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoMPEG2() (ret VideoMPEG2, err error) {
+	var p C.OMX_VIDEO_PARAM_MPEG2TYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoMPEG2, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.PFrames = uint(p.nPFrames)
+	ret.BFrames = uint(p.nBFrames)
+	ret.Profile = VideoMPEG2Profile(p.eProfile)
+	ret.Level = VideoMPEG2Level(p.eLevel)
+	return
+}

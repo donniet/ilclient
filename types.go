@@ -608,6 +608,246 @@ func (c VideoMotionVectorAccuracy) String() string {
 	return fmt.Sprintf("UNKNOWN[%d]", int(c))
 }
 
+type VideoIntraRefreshMode C.OMX_VIDEO_INTRAREFRESHTYPE
+
+const (
+	VideoIntraRefreshCyclic            VideoIntraRefreshMode = C.OMX_VIDEO_IntraRefreshCyclic
+	VideoIntraRefreshAdaptive          VideoIntraRefreshMode = C.OMX_VIDEO_IntraRefreshAdaptive
+	VideoIntraRefreshBoth              VideoIntraRefreshMode = C.OMX_VIDEO_IntraRefreshBoth
+	VideoIntraRefreshKhronosExtensions VideoIntraRefreshMode = C.OMX_VIDEO_IntraRefreshKhronosExtensions
+	VideoIntraRefreshVendorStartUnused VideoIntraRefreshMode = C.OMX_VIDEO_IntraRefreshVendorStartUnused
+	VideoIntraRefreshCyclicMrows       VideoIntraRefreshMode = C.OMX_VIDEO_IntraRefreshCyclicMrows
+	VideoIntraRefreshPseudoRand        VideoIntraRefreshMode = C.OMX_VIDEO_IntraRefreshPseudoRand
+	VideoIntraRefreshMax               VideoIntraRefreshMode = C.OMX_VIDEO_IntraRefreshMax
+)
+
+func (v VideoIntraRefreshMode) String() string {
+	switch v {
+	case VideoIntraRefreshCyclic:
+		return "VideoIntraRefreshCyclic"
+	case VideoIntraRefreshAdaptive:
+		return "VideoIntraRefreshAdaptive"
+	case VideoIntraRefreshBoth:
+		return "VideoIntraRefreshBoth"
+	case VideoIntraRefreshKhronosExtensions:
+		return "VideoIntraRefreshKhronosExtensions"
+	case VideoIntraRefreshVendorStartUnused:
+		return "VideoIntraRefreshVendorStartUnused"
+	case VideoIntraRefreshCyclicMrows:
+		return "VideoIntraRefreshCyclicMrows"
+	case VideoIntraRefreshPseudoRand:
+		return "VideoIntraRefreshPseudoRand"
+	case VideoIntraRefreshMax:
+		return "VideoIntraRefreshMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoH263Profile C.OMX_VIDEO_H263PROFILETYPE
+
+const (
+	VideoH263ProfileBaseline           VideoH263Profile = C.OMX_VIDEO_H263ProfileBaseline
+	VideoH263ProfileH320Coding         VideoH263Profile = C.OMX_VIDEO_H263ProfileH320Coding
+	VideoH263ProfileBackwardCompatible VideoH263Profile = C.OMX_VIDEO_H263ProfileBackwardCompatible
+	VideoH263ProfileISWV2              VideoH263Profile = C.OMX_VIDEO_H263ProfileISWV2
+	VideoH263ProfileISWV3              VideoH263Profile = C.OMX_VIDEO_H263ProfileISWV3
+	VideoH263ProfileHighCompression    VideoH263Profile = C.OMX_VIDEO_H263ProfileHighCompression
+	VideoH263ProfileInternet           VideoH263Profile = C.OMX_VIDEO_H263ProfileInternet
+	VideoH263ProfileInterlace          VideoH263Profile = C.OMX_VIDEO_H263ProfileInterlace
+	VideoH263ProfileHighLatency        VideoH263Profile = C.OMX_VIDEO_H263ProfileHighLatency
+	VideoH263ProfileKhronosExtensions  VideoH263Profile = C.OMX_VIDEO_H263ProfileKhronosExtensions
+	VideoH263ProfileVendorStartUnused  VideoH263Profile = C.OMX_VIDEO_H263ProfileVendorStartUnused
+	VideoH263ProfileMax                VideoH263Profile = C.OMX_VIDEO_H263ProfileMax
+)
+
+func (v VideoH263Profile) String() string {
+	switch v {
+	case VideoH263ProfileBaseline:
+		return "VideoH263ProfileBaseline"
+	case VideoH263ProfileH320Coding:
+		return "VideoH263ProfileH320Coding"
+	case VideoH263ProfileBackwardCompatible:
+		return "VideoH263ProfileBackwardCompatible"
+	case VideoH263ProfileISWV2:
+		return "VideoH263ProfileISWV2"
+	case VideoH263ProfileISWV3:
+		return "VideoH263ProfileISWV3"
+	case VideoH263ProfileHighCompression:
+		return "VideoH263ProfileHighCompression"
+	case VideoH263ProfileInternet:
+		return "VideoH263ProfileInternet"
+	case VideoH263ProfileInterlace:
+		return "VideoH263ProfileInterlace"
+	case VideoH263ProfileHighLatency:
+		return "VideoH263ProfileHighLatency"
+	case VideoH263ProfileKhronosExtensions:
+		return "VideoH263ProfileKhronosExtensions"
+	case VideoH263ProfileVendorStartUnused:
+		return "VideoH263ProfileVendorStartUnused"
+	case VideoH263ProfileMax:
+		return "VideoH263ProfileMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoH263Level C.OMX_VIDEO_H263LEVELTYPE
+
+const (
+	VideoH263Level10                VideoH263Level = C.OMX_VIDEO_H263Level10
+	VideoH263Level20                VideoH263Level = C.OMX_VIDEO_H263Level20
+	VideoH263Level30                VideoH263Level = C.OMX_VIDEO_H263Level30
+	VideoH263Level40                VideoH263Level = C.OMX_VIDEO_H263Level40
+	VideoH263Level45                VideoH263Level = C.OMX_VIDEO_H263Level45
+	VideoH263Level50                VideoH263Level = C.OMX_VIDEO_H263Level50
+	VideoH263Level60                VideoH263Level = C.OMX_VIDEO_H263Level60
+	VideoH263Level70                VideoH263Level = C.OMX_VIDEO_H263Level70
+	VideoH263LevelKhronosExtensions VideoH263Level = C.OMX_VIDEO_H263LevelKhronosExtensions
+	VideoH263LevelVendorStartUnused VideoH263Level = C.OMX_VIDEO_H263LevelVendorStartUnused
+	VideoH263LevelMax               VideoH263Level = C.OMX_VIDEO_H263LevelMax
+)
+
+func (v VideoH263Level) String() string {
+	switch v {
+	case VideoH263Level10:
+		return "VideoH263Level10"
+	case VideoH263Level20:
+		return "VideoH263Level20"
+	case VideoH263Level30:
+		return "VideoH263Level30"
+	case VideoH263Level40:
+		return "VideoH263Level40"
+	case VideoH263Level45:
+		return "VideoH263Level45"
+	case VideoH263Level50:
+		return "VideoH263Level50"
+	case VideoH263Level60:
+		return "VideoH263Level60"
+	case VideoH263Level70:
+		return "VideoH263Level70"
+	case VideoH263LevelKhronosExtensions:
+		return "VideoH263LevelKhronosExtensions"
+	case VideoH263LevelVendorStartUnused:
+		return "VideoH263LevelVendorStartUnused"
+	case VideoH263LevelMax:
+		return "VideoH263LevelMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoPicture C.OMX_VIDEO_PICTURETYPE
+
+const (
+	VideoPictureI                 VideoPicture = C.OMX_VIDEO_PictureTypeI
+	VideoPictureP                 VideoPicture = C.OMX_VIDEO_PictureTypeP
+	VideoPictureB                 VideoPicture = C.OMX_VIDEO_PictureTypeB
+	VideoPictureSI                VideoPicture = C.OMX_VIDEO_PictureTypeSI
+	VideoPictureSP                VideoPicture = C.OMX_VIDEO_PictureTypeSP
+	VideoPictureEI                VideoPicture = C.OMX_VIDEO_PictureTypeEI
+	VideoPictureEP                VideoPicture = C.OMX_VIDEO_PictureTypeEP
+	VideoPictureS                 VideoPicture = C.OMX_VIDEO_PictureTypeS
+	VideoPictureKhronosExtensions VideoPicture = C.OMX_VIDEO_PictureTypeKhronosExtensions
+	VideoPictureVendorStartUnused VideoPicture = C.OMX_VIDEO_PictureTypeVendorStartUnused
+	VideoPictureMax               VideoPicture = C.OMX_VIDEO_PictureTypeMax
+)
+
+func (v VideoPicture) String() string {
+	switch v {
+	case VideoPictureI:
+		return "VideoPictureI"
+	case VideoPictureP:
+		return "VideoPictureP"
+	case VideoPictureB:
+		return "VideoPictureB"
+	case VideoPictureSI:
+		return "VideoPictureSI"
+	case VideoPictureSP:
+		return "VideoPictureSP"
+	case VideoPictureEI:
+		return "VideoPictureEI"
+	case VideoPictureEP:
+		return "VideoPictureEP"
+	case VideoPictureS:
+		return "VideoPictureS"
+	case VideoPictureKhronosExtensions:
+		return "VideoPictureKhronosExtensions"
+	case VideoPictureVendorStartUnused:
+		return "VideoPictureVendorStartUnused"
+	case VideoPictureMax:
+		return "VideoPictureMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoMPEG2Profile C.OMX_VIDEO_MPEG2PROFILETYPE
+
+const (
+	VideoMPEG2ProfileSimple            VideoMPEG2Profile = C.OMX_VIDEO_MPEG2ProfileSimple
+	VideoMPEG2ProfileMain              VideoMPEG2Profile = C.OMX_VIDEO_MPEG2ProfileMain
+	VideoMPEG2Profile422               VideoMPEG2Profile = C.OMX_VIDEO_MPEG2Profile422
+	VideoMPEG2ProfileSNR               VideoMPEG2Profile = C.OMX_VIDEO_MPEG2ProfileSNR
+	VideoMPEG2ProfileSpatial           VideoMPEG2Profile = C.OMX_VIDEO_MPEG2ProfileSpatial
+	VideoMPEG2ProfileHigh              VideoMPEG2Profile = C.OMX_VIDEO_MPEG2ProfileHigh
+	VideoMPEG2ProfileKhronosExtensions VideoMPEG2Profile = C.OMX_VIDEO_MPEG2ProfileKhronosExtensions
+	VideoMPEG2ProfileVendorStartUnused VideoMPEG2Profile = C.OMX_VIDEO_MPEG2ProfileVendorStartUnused
+	VideoMPEG2ProfileMax               VideoMPEG2Profile = C.OMX_VIDEO_MPEG2ProfileMax
+)
+
+func (v VideoMPEG2Profile) String() string {
+	switch v {
+	case VideoMPEG2ProfileSimple:
+		return "VideoMPEG2ProfileSimple"
+	case VideoMPEG2ProfileMain:
+		return "VideoMPEG2ProfileMain"
+	case VideoMPEG2Profile422:
+		return "VideoMPEG2Profile422"
+	case VideoMPEG2ProfileSNR:
+		return "VideoMPEG2ProfileSNR"
+	case VideoMPEG2ProfileSpatial:
+		return "VideoMPEG2ProfileSpatial"
+	case VideoMPEG2ProfileHigh:
+		return "VideoMPEG2ProfileHigh"
+	case VideoMPEG2ProfileKhronosExtensions:
+		return "VideoMPEG2ProfileKhronosExtensions"
+	case VideoMPEG2ProfileVendorStartUnused:
+		return "VideoMPEG2ProfileVendorStartUnused"
+	case VideoMPEG2ProfileMax:
+		return "VideoMPEG2ProfileMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoMPEG2Level C.OMX_VIDEO_MPEG2LEVELTYPE
+
+const (
+	VideoMPEG2LevelLL                VideoMPEG2Level = C.OMX_VIDEO_MPEG2LevelLL
+	VideoMPEG2LevelML                VideoMPEG2Level = C.OMX_VIDEO_MPEG2LevelML
+	VideoMPEG2LevelH14               VideoMPEG2Level = C.OMX_VIDEO_MPEG2LevelH14
+	VideoMPEG2LevelHL                VideoMPEG2Level = C.OMX_VIDEO_MPEG2LevelHL
+	VideoMPEG2LevelKhronosExtensions VideoMPEG2Level = C.OMX_VIDEO_MPEG2LevelKhronosExtensions
+	VideoMPEG2LevelVendorStartUnused VideoMPEG2Level = C.OMX_VIDEO_MPEG2LevelVendorStartUnused
+	VideoMPEG2LevelMax               VideoMPEG2Level = C.OMX_VIDEO_MPEG2LevelMax
+)
+
+func (v VideoMPEG2Level) String() string {
+	switch v {
+	case VideoMPEG2LevelLL:
+		return "VideoMPEG2LevelLL"
+	case VideoMPEG2LevelML:
+		return "VideoMPEG2LevelML"
+	case VideoMPEG2LevelH14:
+		return "VideoMPEG2LevelH14"
+	case VideoMPEG2LevelHL:
+		return "VideoMPEG2LevelHL"
+	case VideoMPEG2LevelKhronosExtensions:
+		return "VideoMPEG2LevelKhronosExtensions"
+	case VideoMPEG2LevelVendorStartUnused:
+		return "VideoMPEG2LevelVendorStartUnused"
+	case VideoMPEG2LevelMax:
+		return "VideoMPEG2LevelMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
 type Version struct {
 	Major    uint8
 	Minor    uint8
