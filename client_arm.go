@@ -18,6 +18,13 @@ extern void enable_trace_logging();
 extern void setup_callbacks(ILCLIENT_T * handle);
 
 extern int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state);
+
+extern OMX_ERRORTYPE set_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
+	OMX_IMAGE_CODINGTYPE format, OMX_COLOR_FORMATTYPE color);
+
+extern OMX_ERRORTYPE get_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
+	OMX_IMAGE_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color);
+
 */
 import "C"
 
@@ -52,7 +59,7 @@ type Buffer struct {
 }
 type ComponentPort struct {
 	component *Component
-	port      int
+	port      PortIndex
 }
 
 var (
@@ -247,7 +254,7 @@ func (c *Component) queryPorts(dir C.OMX_DIRTYPE, domain C.OMX_PORTDOMAINTYPE) [
 			break
 		}
 
-		ret = append(ret, ComponentPort{c, int(p)})
+		ret = append(ret, ComponentPort{c, PortIndex(p)})
 		i++
 	}
 
@@ -262,7 +269,7 @@ func (c *Component) OutputPorts() []ComponentPort {
 	return c.queryPorts(C.OMX_DirOutput, C.OMX_PORTDOMAINTYPE(0XFFFFFFFF))
 }
 
-func (c *Component) OutputBuffer(port_index int) (*Buffer, error) {
+func (c *Component) OutputBuffer(port_index PortIndex) (*Buffer, error) {
 	fmt.Fprintf(os.Stderr, "ilclient_get_output_buffer\n")
 	buf := C.ilclient_get_output_buffer(c.component, C.int(port_index), 0)
 	if buf == nil {
@@ -271,7 +278,7 @@ func (c *Component) OutputBuffer(port_index int) (*Buffer, error) {
 	return &Buffer{buf}, nil
 }
 
-func (c *Component) InputBuffer(port_index int) (*Buffer, error) {
+func (c *Component) InputBuffer(port_index PortIndex) (*Buffer, error) {
 	fmt.Fprintf(os.Stderr, "ilclient_get_input_buffer\n")
 	buf := C.ilclient_get_input_buffer(c.component, C.int(port_index), 0)
 	if buf == nil {
@@ -298,26 +305,26 @@ func (c *Component) SetState(state State) error {
 	return nil
 }
 
-func (c *Component) Port(port_index int) ComponentPort {
+func (c *Component) Port(port_index PortIndex) ComponentPort {
 	return ComponentPort{c, port_index}
 }
 
-func (c *Component) EnablePort(port_index int) {
+func (c *Component) EnablePort(port_index PortIndex) {
 	C.ilclient_enable_port(c.component, C.int(port_index))
 }
 
-func (c *Component) DisablePort(port_index int) {
+func (c *Component) DisablePort(port_index PortIndex) {
 	C.ilclient_disable_port(c.component, C.int(port_index))
 }
 
-func (c *Component) EnablePortBuffers(port_index int) error {
+func (c *Component) EnablePortBuffers(port_index PortIndex) error {
 	if e := C.ilclient_enable_port_buffers(c.component, C.int(port_index), nil, nil, nil); e != 0 {
 		return fmt.Errorf("error: EnablePortBuffers: %v", Error(e))
 	}
 	return nil
 }
 
-func (c *Component) DisablePortBuffers(port_index int) {
+func (c *Component) DisablePortBuffers(port_index PortIndex) {
 	C.ilclient_disable_port_buffers(c.component, C.int(port_index), nil, nil, nil)
 }
 
@@ -336,243 +343,42 @@ func (t *Tunnel) Flush() {
 	C.ilclient_flush_tunnels(t.tunnel, 0)
 }
 
-type State C.OMX_STATETYPE
+type ImageFormat struct {
+	Compression ImagePortFormat
+	Color       ColorFormat
+}
 
-func (s State) String() string {
-	switch C.OMX_STATETYPE(s) {
-	case C.OMX_StateInvalid:
-		return "OMX_StateInvalid"
-	case C.OMX_StateLoaded:
-		return "OMX_StateLoaded"
-	case C.OMX_StateIdle:
-		return "OMX_StateIdle"
-	case C.OMX_StateExecuting:
-		return "OMX_StateExecuting"
-	case C.OMX_StatePause:
-		return "OMX_StatePause"
-	case C.OMX_StateWaitForResources:
-		return "OMX_StateWaitForResources"
+func (c ComponentPort) SetImagePortFormat(formats []ImageFormat) error {
+	for i, f := range formats {
+		e := C.set_image_portformat(c.component.component, C.uint(c.port), C.uint(i),
+			C.OMX_IMAGE_CODINGTYPE(f.Compression), C.OMX_COLOR_FORMATTYPE(f.Color))
+
+		if e != C.OMX_ErrorNone {
+			return Error(e)
+		}
 	}
-	return fmt.Sprintf("UNKONWN %v", int(s))
+
+	return nil
 }
 
-const (
-	StateIdle             State = C.OMX_StateIdle
-	StateLoaded           State = C.OMX_StateLoaded
-	StateInvalid          State = C.OMX_StateInvalid
-	StateExecuting        State = C.OMX_StateExecuting
-	StatePause            State = C.OMX_StatePause
-	StateWaitForResources State = C.OMX_StateWaitForResources
-)
+func (c ComponentPort) GetImagePortFormat() ([]ImageFormat, error) {
+	var ret []ImageFormat
+	var e C.OMX_ERRORTYPE
 
-type TunnelError int
+	for i := uint(0); true; i++ {
+		var coding C.OMX_IMAGE_CODINGTYPE
+		var color C.OMX_COLOR_FORMATTYPE
 
-const (
-	TunnelErrorNone              TunnelError = 0
-	TunnelErrorTimeout           TunnelError = -1
-	TunnelErrorParameter         TunnelError = -2
-	TunnelErrorNoStreams         TunnelError = -3
-	TunnelErrorStreamUnavailable TunnelError = -4
-	TunnelErrorDataFormat        TunnelError = -5
-	TunnelErrorNoEnable          TunnelError = -0x7fff
-)
+		fmt.Fprintf(os.Stderr, "getting image format: %s: %d\n", c.port, int(c.port))
+		e = C.get_image_portformat(c.component.component, C.uint(c.port), C.uint(i),
+			&coding, &color)
 
-func (e TunnelError) String() string {
-	switch e {
-	case TunnelErrorNone:
-		return "TunnelErrorNone"
-	case TunnelErrorTimeout:
-		return "TunnelErrorTimeout"
-	case TunnelErrorParameter:
-		return "TunnelErrorParameter"
-	case TunnelErrorNoStreams:
-		return "TunnelErrorNoStreams"
-	case TunnelErrorStreamUnavailable:
-		return "TunnelErrorStreamUnavailable"
-	case TunnelErrorDataFormat:
-		return "TunnelErrorDataFormat"
-	case TunnelErrorNoEnable:
-		return "TunnelErrorNoEnable"
+		if e == C.OMX_ErrorNone {
+			ret = append(ret, ImageFormat{ImagePortFormat(coding), ColorFormat(color)})
+		} else {
+			break
+		}
 	}
-	return fmt.Sprintf("UNKONWN %x", int(e))
-}
-func (e TunnelError) Error() string {
-	return e.String()
-}
 
-type Error C.OMX_ERRORTYPE
-
-func (e Error) Error() string {
-	return e.String()
-}
-
-func (e Error) String() string {
-	switch C.OMX_ERRORTYPE(e) {
-	case C.OMX_ErrorNone:
-		return "OMX_ErrorNone"
-	case C.OMX_ErrorInsufficientResources:
-		return "OMX_ErrorInsufficientResources"
-	case C.OMX_ErrorUndefined:
-		return "OMX_ErrorUndefined"
-	case C.OMX_ErrorInvalidComponentName:
-		return "OMX_ErrorInvalidComponentName"
-	case C.OMX_ErrorComponentNotFound:
-		return "OMX_ErrorComponentNotFound"
-	case C.OMX_ErrorInvalidComponent:
-		return "OMX_ErrorInvalidComponent"
-	case C.OMX_ErrorBadParameter:
-		return "OMX_ErrorBadParameter"
-	case C.OMX_ErrorNotImplemented:
-		return "OMX_ErrorNotImplemented"
-	case C.OMX_ErrorUnderflow:
-		return "OMX_ErrorUnderflow"
-	case C.OMX_ErrorOverflow:
-		return "OMX_ErrorOverflow"
-	case C.OMX_ErrorHardware:
-		return "OMX_ErrorHardware"
-	case C.OMX_ErrorInvalidState:
-		return "OMX_ErrorInvalidState"
-	case C.OMX_ErrorStreamCorrupt:
-		return "OMX_ErrorStreamCorrupt"
-	case C.OMX_ErrorPortsNotCompatible:
-		return "OMX_ErrorPortsNotCompatible"
-	case C.OMX_ErrorResourcesLost:
-		return "OMX_ErrorResourcesLost"
-	case C.OMX_ErrorNoMore:
-		return "OMX_ErrorNoMore"
-	case C.OMX_ErrorVersionMismatch:
-		return "OMX_ErrorVersionMismatch"
-	case C.OMX_ErrorNotReady:
-		return "OMX_ErrorNotReady"
-	case C.OMX_ErrorTimeout:
-		return "OMX_ErrorTimeout"
-	case C.OMX_ErrorSameState:
-		return "OMX_ErrorSameState"
-	case C.OMX_ErrorResourcesPreempted:
-		return "OMX_ErrorResourcesPreempted"
-	case C.OMX_ErrorPortUnresponsiveDuringAllocation:
-		return "OMX_ErrorPortUnresponsiveDuringAllocation"
-	case C.OMX_ErrorPortUnresponsiveDuringDeallocation:
-		return "OMX_ErrorPortUnresponsiveDuringDeallocation"
-	case C.OMX_ErrorPortUnresponsiveDuringStop:
-		return "OMX_ErrorPortUnresponsiveDuringStop"
-	case C.OMX_ErrorIncorrectStateTransition:
-		return "OMX_ErrorIncorrectStateTransition"
-	case C.OMX_ErrorIncorrectStateOperation:
-		return "OMX_ErrorIncorrectStateOperation"
-	case C.OMX_ErrorUnsupportedSetting:
-		return "OMX_ErrorUnsupportedSetting"
-	case C.OMX_ErrorUnsupportedIndex:
-		return "OMX_ErrorUnsupportedIndex"
-	case C.OMX_ErrorBadPortIndex:
-		return "OMX_ErrorBadPortIndex"
-	case C.OMX_ErrorPortUnpopulated:
-		return "OMX_ErrorPortUnpopulated"
-	case C.OMX_ErrorComponentSuspended:
-		return "OMX_ErrorComponentSuspended"
-	case C.OMX_ErrorDynamicResourcesUnavailable:
-		return "OMX_ErrorDynamicResourcesUnavailable"
-	case C.OMX_ErrorMbErrorsInFrame:
-		return "OMX_ErrorMbErrorsInFrame"
-	case C.OMX_ErrorFormatNotDetected:
-		return "OMX_ErrorFormatNotDetected"
-	case C.OMX_ErrorContentPipeOpenFailed:
-		return "OMX_ErrorContentPipeOpenFailed"
-	case C.OMX_ErrorContentPipeCreationFailed:
-		return "OMX_ErrorContentPipeCreationFailed"
-	case C.OMX_ErrorSeperateTablesUsed:
-		return "OMX_ErrorSeperateTablesUsed"
-	case C.OMX_ErrorTunnelingUnsupported:
-		return "OMX_ErrorTunnelingUnsupported"
-	case C.OMX_ErrorDiskFull:
-		return "OMX_ErrorDiskFull"
-	case C.OMX_ErrorMaxFileSize:
-		return "OMX_ErrorMaxFileSize"
-	case C.OMX_ErrorDrmUnauthorised:
-		return "OMX_ErrorDrmUnauthorised"
-	case C.OMX_ErrorDrmExpired:
-		return "OMX_ErrorDrmExpired"
-	case C.OMX_ErrorDrmGeneral:
-		return "OMX_ErrorDrmGeneral"
-	}
-	return fmt.Sprintf("UNKNOWN %x", int(e))
-}
-
-type CreateFlag C.ILCLIENT_CREATE_FLAGS_T
-
-const (
-	CreateFlagNone                CreateFlag = C.ILCLIENT_FLAGS_NONE
-	CreateFlagEnableInputBuffers  CreateFlag = C.ILCLIENT_ENABLE_INPUT_BUFFERS
-	CreateFlagEnableOutputBuffers CreateFlag = C.ILCLIENT_ENABLE_OUTPUT_BUFFERS
-	CreateFlagDisableAllPorts     CreateFlag = C.ILCLIENT_DISABLE_ALL_PORTS
-	CreateFlagHostComponent       CreateFlag = C.ILCLIENT_HOST_COMPONENT
-	CreateFlagOutputZeroBuffers   CreateFlag = C.ILCLIENT_OUTPUT_ZERO_BUFFERS
-)
-
-func (f CreateFlag) String() string {
-	switch f {
-	case CreateFlagNone:
-		return "CreateFlagNone"
-	case CreateFlagEnableInputBuffers:
-		return "CreateFlagEnableInputBuffers"
-	case CreateFlagEnableOutputBuffers:
-		return "CreateFlagEnableOutputBuffers"
-	case CreateFlagDisableAllPorts:
-		return "CreateFlagDisableAllPorts"
-	case CreateFlagHostComponent:
-		return "CreateFlagHostComponent"
-	case CreateFlagOutputZeroBuffers:
-		return "CreateFlagOutputZeroBuffers"
-	}
-	return fmt.Sprintf("UNKNOWN[%x]", int(f))
-}
-
-type PortIndex int
-
-const (
-	CameraPreviewOut         PortIndex = 70
-	CameraCaptureOut         PortIndex = 71
-	CameraStillCaptureOut    PortIndex = 72
-	CameraClockIn            PortIndex = 73
-	VideoSplitterInputIn     PortIndex = 250
-	VideoSplitterOutput1Out  PortIndex = 251
-	VideoSplitterOutput2Out  PortIndex = 252
-	VideoSplitterOutput3Out  PortIndex = 253
-	VideoSplitterOutput4Out  PortIndex = 254
-	ImageEncodeRawPixelsIn   PortIndex = 340
-	ImageEncodeCompressedOut PortIndex = 341
-	VideoEncodeRawVideoIn    PortIndex = 200
-	VideoEncodeCompressedOut PortIndex = 201
-)
-
-func (p PortIndex) String() string {
-	switch p {
-	case CameraPreviewOut:
-		return "CameraPreviewOut"
-	case CameraCaptureOut:
-		return "CameraCaptureOut"
-	case CameraStillCaptureOut:
-		return "CameraStillCaptureOut"
-	case CameraClockIn:
-		return "CameraClockIn"
-	case VideoSplitterInputIn:
-		return "VideoSplitterInputIn"
-	case VideoSplitterOutput1Out:
-		return "VideoSplitterOutput1Out"
-	case VideoSplitterOutput2Out:
-		return "VideoSplitterOutput2Out"
-	case VideoSplitterOutput3Out:
-		return "VideoSplitterOutput3Out"
-	case VideoSplitterOutput4Out:
-		return "VideoSplitterOutput4Out"
-	case ImageEncodeRawPixelsIn:
-		return "ImageEncodeRawPixelsIn"
-	case ImageEncodeCompressedOut:
-		return "ImageEncodeCompressedOut"
-	case VideoEncodeRawVideoIn:
-		return "VideoEncodeRawVideoIn"
-	case VideoEncodeCompressedOut:
-		return "VideoEncodeCompressedOut"
-	}
-	return fmt.Sprintf("UNKNOWN %d", int(p))
+	return ret, Error(e) // check for error when index is out of bounds and return nil
 }

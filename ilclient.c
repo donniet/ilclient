@@ -310,7 +310,7 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
    char component_name[128];
    int32_t status;
 
-   fprintf(stderr, "ilclient_create_component: allocating space for component\n");
+ //   // fprintf(stderr, "ilclient_create_component: allocating space for component\n");
 
    *comp = vcos_malloc(sizeof(COMPONENT_T), "il:comp");
    if(!*comp)
@@ -321,7 +321,7 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
 #define COMP_PREFIX "OMX.broadcom."
 
 
-   fprintf(stderr, "ilclient_create_component: creating flags and semaphore\n");
+ //   // fprintf(stderr, "ilclient_create_component: creating flags and semaphore\n");
 
    status = vcos_event_flags_create(&(*comp)->event,"il:comp");
    vc_assert(status == VCOS_SUCCESS);
@@ -336,26 +336,26 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
    (*comp)->flags = flags;
 
 
-   fprintf(stderr, "ilclient_create_component: name: '%s', bufname: '%s', component_name: '%s', flags: %x\n", (*comp)->name, (*comp)->bufname, component_name, flags);
+ //   // fprintf(stderr, "ilclient_create_component: name: '%s', bufname: '%s', component_name: '%s', flags: %x\n", (*comp)->name, (*comp)->bufname, component_name, flags);
 
-   fprintf(stderr, "ilclient_create_component: setting event handlers\n");
+ //   // fprintf(stderr, "ilclient_create_component: setting event handlers\n");
 
    callbacks.EventHandler = ilclient_event_handler;
    callbacks.EmptyBufferDone = flags & ILCLIENT_ENABLE_INPUT_BUFFERS ? ilclient_empty_buffer_done : ilclient_empty_buffer_done_error;
    callbacks.FillBufferDone = flags & ILCLIENT_ENABLE_OUTPUT_BUFFERS ? ilclient_fill_buffer_done : ilclient_fill_buffer_done_error;
 
 
-   fprintf(stderr, "ilclient_create_component: getting component handle\n");
+ //   // fprintf(stderr, "ilclient_create_component: getting component handle\n");
    error = OMX_GetHandle(&(*comp)->comp, component_name, *comp, &callbacks);
 
    if (error == OMX_ErrorNone)
    {
-      fprintf(stderr, "ilclient_create_component: component created successfully.\n");
+    //   // fprintf(stderr, "ilclient_create_component: component created successfully.\n");
       OMX_UUIDTYPE uid;
       char name[128];
       OMX_VERSIONTYPE compVersion, specVersion;
 
-      fprintf(stderr, "ilclient_create_component: getting component version.\n");
+    //   // fprintf(stderr, "ilclient_create_component: getting component version.\n");
 
       if(OMX_GetComponentVersion((*comp)->comp, name, &compVersion, &specVersion, &uid) == OMX_ErrorNone)
       {
@@ -366,16 +366,16 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
          vcos_snprintf((*comp)->bufname, sizeof((*comp)->bufname), "cl:%s buffer", p);
          (*comp)->bufname[sizeof((*comp)->bufname)-1] = 0;
          
-         fprintf(stderr, "ilclient_create_component: name: '%s', bufname: '%s'\n", (*comp)->name, (*comp)->bufname);
+       //   // fprintf(stderr, "ilclient_create_component: name: '%s', bufname: '%s'\n", (*comp)->name, (*comp)->bufname);
 
       }
 
-      fprintf(stderr, "ilclient_create_component: checking buffers and ports\n");
+    //   // fprintf(stderr, "ilclient_create_component: checking buffers and ports\n");
 
       if(flags & (ILCLIENT_DISABLE_ALL_PORTS | ILCLIENT_OUTPUT_ZERO_BUFFERS))
       {
          
-         fprintf(stderr, "ilclient_create_component: disable ports and zero buffers\n");
+       //   // fprintf(stderr, "ilclient_create_component: disable ports and zero buffers\n");
 
          OMX_PORT_PARAM_TYPE ports;
          OMX_INDEXTYPE types[] = {OMX_IndexParamAudioInit, OMX_IndexParamVideoInit, OMX_IndexParamImageInit, OMX_IndexParamOtherInit};
@@ -387,7 +387,7 @@ int ilclient_create_component(ILCLIENT_T *client, COMPONENT_T **comp, char *name
          for(i=0; i<4; i++)
          {
 
-            fprintf(stderr, "ilclient_create_component: getting ports of type '%s'\n", index2string(types[i]));
+          //   // fprintf(stderr, "ilclient_create_component: getting ports of type '%s'\n", index2string(types[i]));
 
             OMX_ERRORTYPE error = OMX_GetParameter((*comp)->comp, types[i], &ports);
             if(error == OMX_ErrorNone)
@@ -1474,8 +1474,8 @@ static OMX_ERRORTYPE ilclient_event_handler(OMX_IN OMX_HANDLETYPE hComponent,
                                             OMX_IN OMX_PTR pEventData)
 {
 
-   fprintf(stderr, "ilclient_event_handler(%p %p %s %d %d %p)\n", 
-      hComponent, pAppData, ilclient_event_string(eEvent), nData1, nData2, pEventData);
+ //   // fprintf(stderr, "ilclient_event_handler(%p %p %s %d %d %p)\n", 
+     // hComponent, pAppData, ilclient_event_string(eEvent), nData1, nData2, pEventData);
 
    COMPONENT_T *st = (COMPONENT_T *) pAppData;
    ILEVENT_T *event;
