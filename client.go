@@ -821,6 +821,21 @@ type H263ProfileLevel struct {
 	Level   VideoH263Level
 }
 
+func (c ComponentPort) CurrentH263ProfileLevel() (ret H263ProfileLevel, err error) {
+	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelCurrent, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+	} else {
+		ret.Profile = VideoH263Profile(p.eProfile)
+		ret.Level = VideoH263Level(p.eLevel)
+	}
+	return
+}
+
 func (c ComponentPort) SupportedH263ProfileLevels() (ret []H263ProfileLevel, err error) {
 	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
 	var e C.OMX_ERRORTYPE
@@ -830,7 +845,7 @@ func (c ComponentPort) SupportedH263ProfileLevels() (ret []H263ProfileLevel, err
 		p.nPortIndex = C.OMX_U32(c.port)
 		p.nProfileIndex = C.OMX_U32(i)
 
-		e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
+		e = C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
 		if e != C.OMX_ErrorNone {
 			break
 		}
@@ -892,6 +907,21 @@ type MPEG2ProfileLevel struct {
 	Level   VideoMPEG2Level
 }
 
+func (c ComponentPort) CurrentMPEG2ProfileLevel() (ret MPEG2ProfileLevel, err error) {
+	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelCurrent, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+	} else {
+		ret.Profile = VideoMPEG2Profile(p.eProfile)
+		ret.Level = VideoMPEG2Level(p.eLevel)
+	}
+	return
+}
+
 func (c ComponentPort) SupportedMPEG2ProfileLevels() (ret []MPEG2ProfileLevel, err error) {
 	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
 	var e C.OMX_ERRORTYPE
@@ -901,7 +931,7 @@ func (c ComponentPort) SupportedMPEG2ProfileLevels() (ret []MPEG2ProfileLevel, e
 		p.nPortIndex = C.OMX_U32(c.port)
 		p.nProfileIndex = C.OMX_U32(i)
 
-		e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
+		e = C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
 		if e != C.OMX_ErrorNone {
 			break
 		}
@@ -987,6 +1017,21 @@ type MPEG4ProfileLevel struct {
 	Level   VideoMPEG4Level
 }
 
+func (c ComponentPort) CurrentMPEG4ProfileLevel() (ret MPEG4ProfileLevel, err error) {
+	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelCurrent, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+	} else {
+		ret.Profile = VideoMPEG4Profile(p.eProfile)
+		ret.Level = VideoMPEG4Level(p.eLevel)
+	}
+	return
+}
+
 func (c ComponentPort) SupportedMPEG4ProfileLevels() (ret []MPEG4ProfileLevel, err error) {
 	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
 	var e C.OMX_ERRORTYPE
@@ -996,7 +1041,7 @@ func (c ComponentPort) SupportedMPEG4ProfileLevels() (ret []MPEG4ProfileLevel, e
 		p.nPortIndex = C.OMX_U32(c.port)
 		p.nProfileIndex = C.OMX_U32(i)
 
-		e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
+		e = C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
 		if e != C.OMX_ErrorNone {
 			break
 		}
@@ -1210,6 +1255,21 @@ type AVCProfileLevel struct {
 	Level   VideoAVCLevel
 }
 
+func (c ComponentPort) CurrentAVCProfileLevel() (ret AVCProfileLevel, err error) {
+	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelCurrent, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+	} else {
+		ret.Profile = VideoAVCProfile(p.eProfile)
+		ret.Level = VideoAVCLevel(p.eLevel)
+	}
+	return
+}
+
 func (c ComponentPort) SupportedAVCProfileLevels() (ret []AVCProfileLevel, err error) {
 	var p C.OMX_VIDEO_PARAM_PROFILELEVELTYPE
 	var e C.OMX_ERRORTYPE
@@ -1219,7 +1279,7 @@ func (c ComponentPort) SupportedAVCProfileLevels() (ret []AVCProfileLevel, err e
 		p.nPortIndex = C.OMX_U32(c.port)
 		p.nProfileIndex = C.OMX_U32(i)
 
-		e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
+		e = C.get_parameter(c.component.component, C.OMX_IndexParamVideoProfileLevelQuerySupported, unsafe.Pointer(&p))
 		if e != C.OMX_ErrorNone {
 			break
 		}
