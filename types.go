@@ -257,28 +257,39 @@ func (p PortIndex) String() string {
 }
 
 type VideoCoding C.OMX_VIDEO_CODINGTYPE
+
 const (
-	VideoCodingUnused VideoCoding = C.OMX_VIDEO_CodingUnused
-    VideoCodingAutoDetect VideoCoding = C.OMX_VIDEO_CodingAutoDetect
-    VideoCodingMPEG2 VideoCoding = C.OMX_VIDEO_CodingMPEG2
-    VideoCodingH263 VideoCoding = C.OMX_VIDEO_CodingH263
-    VideoCodingMPEG4 VideoCoding = C.OMX_VIDEO_CodingMPEG4
-    VideoCodingWMV VideoCoding = C.OMX_VIDEO_CodingWMV
-    VideoCodingRV VideoCoding = C.OMX_VIDEO_CodingRV
-    VideoCodingAVC VideoCoding = C.OMX_VIDEO_CodingAVC
-    VideoCodingMJPEG VideoCoding = C.OMX_VIDEO_CodingMJPEG
+	VideoCodingUnused     VideoCoding = C.OMX_VIDEO_CodingUnused
+	VideoCodingAutoDetect VideoCoding = C.OMX_VIDEO_CodingAutoDetect
+	VideoCodingMPEG2      VideoCoding = C.OMX_VIDEO_CodingMPEG2
+	VideoCodingH263       VideoCoding = C.OMX_VIDEO_CodingH263
+	VideoCodingMPEG4      VideoCoding = C.OMX_VIDEO_CodingMPEG4
+	VideoCodingWMV        VideoCoding = C.OMX_VIDEO_CodingWMV
+	VideoCodingRV         VideoCoding = C.OMX_VIDEO_CodingRV
+	VideoCodingAVC        VideoCoding = C.OMX_VIDEO_CodingAVC
+	VideoCodingMJPEG      VideoCoding = C.OMX_VIDEO_CodingMJPEG
 )
+
 func (v VideoCoding) String() string {
 	switch v {
-	case VideoCodingUnused: return "VideoCodingUnused"; 
-    case VideoCodingAutoDetect: return "VideoCodingAutoDetect"; 
-    case VideoCodingMPEG2: return "VideoCodingMPEG2"; 
-    case VideoCodingH263: return "VideoCodingH263"; 
-    case VideoCodingMPEG4: return "VideoCodingMPEG4"; 
-    case VideoCodingWMV: return "VideoCodingWMV"; 
-    case VideoCodingRV: return "VideoCodingRV"; 
-    case VideoCodingAVC: return "VideoCodingAVC"; 
-    case VideoCodingMJPEG: return "VideoCodingMJPEG"; 
+	case VideoCodingUnused:
+		return "VideoCodingUnused"
+	case VideoCodingAutoDetect:
+		return "VideoCodingAutoDetect"
+	case VideoCodingMPEG2:
+		return "VideoCodingMPEG2"
+	case VideoCodingH263:
+		return "VideoCodingH263"
+	case VideoCodingMPEG4:
+		return "VideoCodingMPEG4"
+	case VideoCodingWMV:
+		return "VideoCodingWMV"
+	case VideoCodingRV:
+		return "VideoCodingRV"
+	case VideoCodingAVC:
+		return "VideoCodingAVC"
+	case VideoCodingMJPEG:
+		return "VideoCodingMJPEG"
 	}
 	return fmt.Sprintf("UNKNOWN[%d]", int(v))
 }
@@ -531,31 +542,71 @@ func (f ColorFormat) String() string {
 }
 
 type VideoControlRate C.OMX_VIDEO_CONTROLRATETYPE
+
 const (
-	ControlRateDisable VideoControlRate = C.OMX_Video_ControlRateDisable
-    ControlRateVariable VideoControlRate = C.OMX_Video_ControlRateVariable
-    ControlRateConstant VideoControlRate = C.OMX_Video_ControlRateConstant
-    ControlRateVariableSkipFrames VideoControlRate = C.OMX_Video_ControlRateVariableSkipFrames
-    ControlRateConstantSkipFrames VideoControlRate = C.OMX_Video_ControlRateConstantSkipFrames
-    ControlRateKhronosExtensions VideoControlRate = C.OMX_Video_ControlRateKhronosExtensions
-    ControlRateVendorStartUnused VideoControlRate = C.OMX_Video_ControlRateVendorStartUnused
-    ControlRateMax VideoControlRate = C.OMX_Video_ControlRateMax
+	ControlRateDisable            VideoControlRate = C.OMX_Video_ControlRateDisable
+	ControlRateVariable           VideoControlRate = C.OMX_Video_ControlRateVariable
+	ControlRateConstant           VideoControlRate = C.OMX_Video_ControlRateConstant
+	ControlRateVariableSkipFrames VideoControlRate = C.OMX_Video_ControlRateVariableSkipFrames
+	ControlRateConstantSkipFrames VideoControlRate = C.OMX_Video_ControlRateConstantSkipFrames
+	ControlRateKhronosExtensions  VideoControlRate = C.OMX_Video_ControlRateKhronosExtensions
+	ControlRateVendorStartUnused  VideoControlRate = C.OMX_Video_ControlRateVendorStartUnused
+	ControlRateMax                VideoControlRate = C.OMX_Video_ControlRateMax
 )
+
 func (c VideoControlRate) String() string {
 	switch c {
-	case ControlRateDisable: return "ControlRateDisable"
-	case ControlRateVariable: return "ControlRateVariable"
-	case ControlRateConstant: return "ControlRateConstant"
-	case ControlRateVariableSkipFrames: return "ControlRateVariableSkipFrames"
-	case ControlRateConstantSkipFrames: return "ControlRateConstantSkipFrames"
-	case ControlRateKhronosExtensions: return "ControlRateKhronosExtensions"
-	case ControlRateVendorStartUnused: return "ControlRateVendorStartUnused"
-	case ControlRateMax: return "ControlRateMax"
+	case ControlRateDisable:
+		return "ControlRateDisable"
+	case ControlRateVariable:
+		return "ControlRateVariable"
+	case ControlRateConstant:
+		return "ControlRateConstant"
+	case ControlRateVariableSkipFrames:
+		return "ControlRateVariableSkipFrames"
+	case ControlRateConstantSkipFrames:
+		return "ControlRateConstantSkipFrames"
+	case ControlRateKhronosExtensions:
+		return "ControlRateKhronosExtensions"
+	case ControlRateVendorStartUnused:
+		return "ControlRateVendorStartUnused"
+	case ControlRateMax:
+		return "ControlRateMax"
 	}
 	return fmt.Sprintf("UNKNOWN[%d]", int(c))
 }
 
+type VideoMotionVectorAccuracy C.OMX_VIDEO_MOTIONVECTORTYPE
 
+const (
+	MotionVectorPixel             VideoMotionVectorAccuracy = C.OMX_Video_MotionVectorPixel
+	MotionVectorHalfPel           VideoMotionVectorAccuracy = C.OMX_Video_MotionVectorHalfPel
+	MotionVectorQuarterPel        VideoMotionVectorAccuracy = C.OMX_Video_MotionVectorQuarterPel
+	MotionVectorEighthPel         VideoMotionVectorAccuracy = C.OMX_Video_MotionVectorEighthPel
+	MotionVectorKhronosExtensions VideoMotionVectorAccuracy = C.OMX_Video_MotionVectorKhronosExtensions
+	MotionVectorVendorStartUnused VideoMotionVectorAccuracy = C.OMX_Video_MotionVectorVendorStartUnused
+	MotionVectorMax               VideoMotionVectorAccuracy = C.OMX_Video_MotionVectorMax
+)
+
+func (c VideoMotionVectorAccuracy) String() string {
+	switch c {
+	case MotionVectorPixel:
+		return "MotionVectorPixel"
+	case MotionVectorHalfPel:
+		return "MotionVectorHalfPel"
+	case MotionVectorQuarterPel:
+		return "MotionVectorQuarterPel"
+	case MotionVectorEighthPel:
+		return "MotionVectorEighthPel"
+	case MotionVectorKhronosExtensions:
+		return "MotionVectorKhronosExtensions"
+	case MotionVectorVendorStartUnused:
+		return "MotionVectorVendorStartUnused"
+	case MotionVectorMax:
+		return "MotionVectorMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(c))
+}
 
 type Version struct {
 	Major    uint8

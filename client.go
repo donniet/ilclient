@@ -1,6 +1,5 @@
 package ilclient
 
-
 import (
 	"fmt"
 	"log"
@@ -36,7 +35,6 @@ extern OMX_ERRORTYPE get_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void
 
 */
 import "C"
-
 
 const default_timeout = 0
 
@@ -359,7 +357,7 @@ func (c ComponentPort) SetImagePortFormat(formats []ImageFormat) error {
 		p.eColorFormat = C.OMX_COLOR_FORMATTYPE(f.Color)
 
 		e := C.set_parameter(c.component.component, C.OMX_IndexParamImagePortFormat, unsafe.Pointer(&p))
-	
+
 		if e != C.OMX_ErrorNone {
 			return Error(e)
 		}
@@ -382,7 +380,7 @@ func (c ComponentPort) GetImagePortFormat() ([]ImageFormat, error) {
 
 		if e == C.OMX_ErrorNone {
 			ret = append(ret, ImageFormat{
-				ImagePortFormat(p.eCompressionFormat), 
+				ImagePortFormat(p.eCompressionFormat),
 				ColorFormat(p.eColorFormat),
 			})
 		} else {
@@ -437,7 +435,7 @@ func (c ComponentPort) GetVideoPortFormat() ([]VideoFormat, error) {
 		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
 		p.nPortIndex = C.OMX_U32(c.port)
 		p.nIndex = C.OMX_U32(i)
-		
+
 		e = C.get_parameter(c.component.component, C.OMX_IndexParamVideoPortFormat, unsafe.Pointer(&p))
 		if e == C.OMX_ErrorNone {
 			ret = append(ret, VideoFormat{
@@ -481,7 +479,7 @@ func (c ComponentPort) GetVideoQuantization() (ret VideoQuantization, err error)
 	var p C.OMX_VIDEO_PARAM_QUANTIZATIONTYPE
 	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
 	p.nPortIndex = C.OMX_U32(c.port)
-	
+
 	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoQuantization, unsafe.Pointer(&p))
 	if e != C.OMX_ErrorNone {
 		return ret, Error(e)
@@ -516,7 +514,7 @@ func (c ComponentPort) SetVideoFastUpdate(v VideoFastUpdate) error {
 	p.nFirstGOB = C.OMX_U32(v.FirstGOB)
 	p.nFirstMB = C.OMX_U32(v.FirstMB)
 	p.nNumMBs = C.OMX_U32(v.NumMB)
-	
+
 	if e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoFastUpdate, unsafe.Pointer(&p)); e != C.OMX_ErrorNone {
 		return Error(e)
 	}
@@ -544,7 +542,82 @@ func (c ComponentPort) GetVideoFastUpdate() (ret VideoFastUpdate, err error) {
 }
 
 type VideoBitrate struct {
-	ControlRate VideoControlRate
+	ControlRate   VideoControlRate
 	TargetBitrate uint
 }
 
+func (c ComponentPort) SetVideoBitrate(v VideoBitrate) error {
+	var p C.OMX_VIDEO_PARAM_BITRATETYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.eControlRate = C.OMX_VIDEO_CONTROLRATETYPE(v.ControlRate)
+	p.nTargetBitrate = C.OMX_U32(v.TargetBitrate)
+
+	if e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoBitrate, unsafe.Pointer(&p)); e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+
+	return nil
+}
+
+func (c ComponentPort) GetVideoBitrate() (ret VideoBitrate, err error) {
+	var p C.OMX_VIDEO_PARAM_BITRATETYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoBitrate, unsafe.Pointer(&p))
+
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.ControlRate = VideoControlRate(p.eControlRate)
+	ret.TargetBitrate = uint(p.nTargetBitrate)
+	return
+}
+
+type VideoMotionVector struct {
+	Accuracy        VideoMotionVectorAccuracy
+	UnrestrictedMVs bool
+	FourMV          bool
+	XSearchRange    int
+	YSearchRange    int
+}
+
+func (c ComponentPort) SetVideoMotionVector(v VideoMotionVector) error {
+	var p C.OMX_VIDEO_PARAM_MOTIONVECTORTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.eAccuracy = C.OMX_VIDEO_MOTIONVECTORTYPE(v.Accuracy)
+	p.bUnrestrictedMVs = toOMXBool(v.UnrestrictedMVs)
+	p.bFourMV = toOMXBool(v.FourMV)
+	p.sXSearchRange = C.OMX_S32(v.XSearchRange)
+	p.sYSearchRange = C.OMX_S32(v.YSearchRange)
+
+	if e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoMotionVector, unsafe.Pointer(&p)); e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+
+	return nil
+}
+
+func (c ComponentPort) GetVideoMotionVector() (ret VideoMotionVector, err error) {
+	var p C.OMX_VIDEO_PARAM_MOTIONVECTORTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoMotionVector, unsafe.Pointer(&p))
+
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.Accuracy = VideoMotionVectorAccuracy(p.eAccuracy)
+	ret.UnrestrictedMVs = (p.bUnrestrictedMVs != C.OMX_FALSE)
+	ret.FourMV = (p.bFourMV != C.OMX_FALSE)
+	ret.XSearchRange = int(p.sXSearchRange)
+	ret.YSearchRange = int(p.sYSearchRange)
+	return
+}
