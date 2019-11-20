@@ -43,6 +43,12 @@ OMX_ERRORTYPE set_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void * para
 OMX_ERRORTYPE get_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param) {
     return OMX_GetParameter(ilclient_get_handle(comp), index, param);
 }
+OMX_ERRORTYPE set_config(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param) {
+    return OMX_SetConfig(ilclient_get_handle(comp), index, param);
+}
+OMX_ERRORTYPE get_config(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param) {
+    return OMX_GetConfig(ilclient_get_handle(comp), index, param);
+}
 
 
 COMPONENT_T* ilclient_create_component_wrapper(ILCLIENT_T *handle, int * ret, char * name, ILCLIENT_CREATE_FLAGS_T flags) {

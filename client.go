@@ -32,6 +32,8 @@ extern int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state);
 extern void initialize_struct(void * p, size_t size);
 extern OMX_ERRORTYPE set_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param);
 extern OMX_ERRORTYPE get_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param);
+extern OMX_ERRORTYPE set_config(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param);
+extern OMX_ERRORTYPE get_config(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param);
 
 */
 import "C"
@@ -1292,5 +1294,114 @@ func (c ComponentPort) SupportedAVCProfileLevels() (ret []AVCProfileLevel, err e
 	if e != C.OMX_ErrorNoMore {
 		err = Error(e)
 	}
+	return
+}
+
+func (c ComponentPort) SetBitrate(bitrate uint) error {
+	var p C.OMX_VIDEO_CONFIG_BITRATETYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.nEncodeBitrate = C.OMX_U32(bitrate)
+
+	e := C.set_config(c.component.component, C.OMX_IndexConfigVideoBitrate, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) Bitrate() (uint, error) {
+	var p C.OMX_VIDEO_CONFIG_BITRATETYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_config(c.component.component, C.OMX_IndexConfigVideoBitrate, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return 0, Error(e)
+	}
+	return uint(p.nEncodeBitrate), nil
+}
+
+func (c ComponentPort) SetFramerate(framerate float64) error {
+	var p C.OMX_CONFIG_FRAMERATETYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.xEncodeFramerate = toQ16(framerate)
+
+	e := C.set_config(c.component.component, C.OMX_IndexConfigVideoFramerate, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) Framerate() (float64, error) {
+	var p C.OMX_CONFIG_FRAMERATETYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_config(c.component.component, C.OMX_IndexConfigVideoFramerate, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return 0., Error(e)
+	}
+	return fromQ16(p.xEncodeFramerate), nil
+}
+
+func (c ComponentPort) SetIntraRefreshVOP(intraRefreshVOP bool) error {
+	var p C.OMX_CONFIG_INTRAREFRESHVOPTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.IntraRefreshVOP = toOMXBool(intraRefreshVOP)
+
+	e := C.set_config(c.component.component, C.OMX_IndexConfigVideoIntraVOPRefresh, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) IntraRefreshVOP() (bool, error) {
+	var p C.OMX_CONFIG_INTRAREFRESHVOPTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_config(c.component.component, C.OMX_IndexConfigVideoIntraVOPRefresh, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return false, Error(e)
+	}
+	return (p.IntraRefreshVOP != C.OMX_FALSE), nil
+}
+
+type MacroBlockErrorMap struct {
+	MapSize uint
+	Hint    [1]uint8
+}
+
+func (c ComponentPort) SetMacroBlockErrorMap(m MacroBlockErrorMap) error {
+	var p C.OMX_CONFIG_MACROBLOCKERRORMAPTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.nErrMapSize = C.OMX_U32(m.MapSize)
+	p.ErrMap[0] = C.OMX_U8(m.Hint[0])
+
+	e := C.set_config(c.component.component, C.OMX_IndexConfigVideoIntraMBRefresh, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) MacroBlockErrorMap() (m MacroBlockErrorMap, err error) {
+	var p C.OMX_CONFIG_MACROBLOCKERRORMAPTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_config(c.component.component, C.OMX_IndexConfigVideoIntraMBRefresh, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return m, Error(e)
+	}
+
+	m.MapSize = uint(p.nErrMapSize)
+	m.Hint[0] = uint8(p.ErrMap[0])
 	return
 }
