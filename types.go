@@ -873,3 +873,182 @@ func (v *Version) fromBytes(b [4]byte) {
 func (v Version) String() string {
 	return fmt.Sprintf("%d.%d.%d.%d", v.Major, v.Minor, v.Revision, v.Step)
 }
+
+type VideoMPEG4Profile C.OMX_VIDEO_MPEG4PROFILETYPE
+
+const (
+	VideoMPEG4ProfileSimple            VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileSimple
+	VideoMPEG4ProfileSimpleScalable    VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileSimpleScalable
+	VideoMPEG4ProfileCore              VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileCore
+	VideoMPEG4ProfileMain              VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileMain
+	VideoMPEG4ProfileNbit              VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileNbit
+	VideoMPEG4ProfileScalableTexture   VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileScalableTexture
+	VideoMPEG4ProfileSimpleFace        VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileSimpleFace
+	VideoMPEG4ProfileSimpleFBA         VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileSimpleFBA
+	VideoMPEG4ProfileBasicAnimated     VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileBasicAnimated
+	VideoMPEG4ProfileHybrid            VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileHybrid
+	VideoMPEG4ProfileAdvancedRealTime  VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileAdvancedRealTime
+	VideoMPEG4ProfileCoreScalable      VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileCoreScalable
+	VideoMPEG4ProfileAdvancedCoding    VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileAdvancedCoding
+	VideoMPEG4ProfileAdvancedCore      VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileAdvancedCore
+	VideoMPEG4ProfileAdvancedScalable  VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileAdvancedScalable
+	VideoMPEG4ProfileAdvancedSimple    VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileAdvancedSimple
+	VideoMPEG4ProfileKhronosExtensions VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileKhronosExtensions
+	VideoMPEG4ProfileVendorStartUnused VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileVendorStartUnused
+	VideoMPEG4ProfileMax               VideoMPEG4Profile = C.OMX_VIDEO_MPEG4ProfileMax
+)
+
+func (v VideoMPEG4Profile) String() string {
+	switch v {
+	case VideoMPEG4ProfileSimple:
+		return "VideoMPEG4ProfileSimple"
+	case VideoMPEG4ProfileSimpleScalable:
+		return "VideoMPEG4ProfileSimpleScalable"
+	case VideoMPEG4ProfileCore:
+		return "VideoMPEG4ProfileCore"
+	case VideoMPEG4ProfileMain:
+		return "VideoMPEG4ProfileMain"
+	case VideoMPEG4ProfileNbit:
+		return "VideoMPEG4ProfileNbit"
+	case VideoMPEG4ProfileScalableTexture:
+		return "VideoMPEG4ProfileScalableTexture"
+	case VideoMPEG4ProfileSimpleFace:
+		return "VideoMPEG4ProfileSimpleFace"
+	case VideoMPEG4ProfileSimpleFBA:
+		return "VideoMPEG4ProfileSimpleFBA"
+	case VideoMPEG4ProfileBasicAnimated:
+		return "VideoMPEG4ProfileBasicAnimated"
+	case VideoMPEG4ProfileHybrid:
+		return "VideoMPEG4ProfileHybrid"
+	case VideoMPEG4ProfileAdvancedRealTime:
+		return "VideoMPEG4ProfileAdvancedRealTime"
+	case VideoMPEG4ProfileCoreScalable:
+		return "VideoMPEG4ProfileCoreScalable"
+	case VideoMPEG4ProfileAdvancedCoding:
+		return "VideoMPEG4ProfileAdvancedCoding"
+	case VideoMPEG4ProfileAdvancedCore:
+		return "VideoMPEG4ProfileAdvancedCore"
+	case VideoMPEG4ProfileAdvancedScalable:
+		return "VideoMPEG4ProfileAdvancedScalable"
+	case VideoMPEG4ProfileAdvancedSimple:
+		return "VideoMPEG4ProfileAdvancedSimple"
+	case VideoMPEG4ProfileKhronosExtensions:
+		return "VideoMPEG4ProfileKhronosExtensions"
+	case VideoMPEG4ProfileVendorStartUnused:
+		return "VideoMPEG4ProfileVendorStartUnused"
+	case VideoMPEG4ProfileMax:
+		return "VideoMPEG4ProfileMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoMPEG4Level C.OMX_VIDEO_MPEG4LEVELTYPE
+
+const (
+	VideoMPEG4Level0                 VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level0
+	VideoMPEG4Level0b                VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level0b
+	VideoMPEG4Level1                 VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level1
+	VideoMPEG4Level2                 VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level2
+	VideoMPEG4Level3                 VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level3
+	VideoMPEG4Level4                 VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level4
+	VideoMPEG4Level4a                VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level4a
+	VideoMPEG4Level5                 VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level5
+	VideoMPEG4Level6                 VideoMPEG4Level = C.OMX_VIDEO_MPEG4Level6
+	VideoMPEG4LevelKhronosExtensions VideoMPEG4Level = C.OMX_VIDEO_MPEG4LevelKhronosExtensions
+	VideoMPEG4LevelVendorStartUnused VideoMPEG4Level = C.OMX_VIDEO_MPEG4LevelVendorStartUnused
+	VideoMPEG4LevelMax               VideoMPEG4Level = C.OMX_VIDEO_MPEG4LevelMax
+)
+
+func (v VideoMPEG4Level) String() string {
+	switch v {
+	case VideoMPEG4Level0:
+		return "VideoMPEG4Level0"
+	case VideoMPEG4Level0b:
+		return "VideoMPEG4Level0b"
+	case VideoMPEG4Level1:
+		return "VideoMPEG4Level1"
+	case VideoMPEG4Level2:
+		return "VideoMPEG4Level2"
+	case VideoMPEG4Level3:
+		return "VideoMPEG4Level3"
+	case VideoMPEG4Level4:
+		return "VideoMPEG4Level4"
+	case VideoMPEG4Level4a:
+		return "VideoMPEG4Level4a"
+	case VideoMPEG4Level5:
+		return "VideoMPEG4Level5"
+	case VideoMPEG4Level6:
+		return "VideoMPEG4Level6"
+	case VideoMPEG4LevelKhronosExtensions:
+		return "VideoMPEG4LevelKhronosExtensions"
+	case VideoMPEG4LevelVendorStartUnused:
+		return "VideoMPEG4LevelVendorStartUnused"
+	case VideoMPEG4LevelMax:
+		return "VideoMPEG4LevelMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoWMVFormat C.OMX_VIDEO_WMVFORMATTYPE
+
+const (
+	VideoWMVFormatUnused            VideoWMVFormat = C.OMX_VIDEO_WMVFormatUnused
+	VideoWMVFormat7                 VideoWMVFormat = C.OMX_VIDEO_WMVFormat7
+	VideoWMVFormat8                 VideoWMVFormat = C.OMX_VIDEO_WMVFormat8
+	VideoWMVFormat9                 VideoWMVFormat = C.OMX_VIDEO_WMVFormat9
+	VideoWMFFormatKhronosExtensions VideoWMVFormat = C.OMX_VIDEO_WMFFormatKhronosExtensions
+	VideoWMFFormatVendorStartUnused VideoWMVFormat = C.OMX_VIDEO_WMFFormatVendorStartUnused
+	VideoWMVFormatMax               VideoWMVFormat = C.OMX_VIDEO_WMVFormatMax
+)
+
+func (v VideoWMVFormat) String() string {
+	switch v {
+	case VideoWMVFormatUnused:
+		return "VideoWMVFormatUnused"
+	case VideoWMVFormat7:
+		return "VideoWMVFormat7"
+	case VideoWMVFormat8:
+		return "VideoWMVFormat8"
+	case VideoWMVFormat9:
+		return "VideoWMVFormat9"
+	case VideoWMFFormatKhronosExtensions:
+		return "VideoWMFFormatKhronosExtensions"
+	case VideoWMFFormatVendorStartUnused:
+		return "VideoWMFFormatVendorStartUnused"
+	case VideoWMVFormatMax:
+		return "VideoWMVFormatMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}
+
+type VideoRVFormat C.OMX_VIDEO_RVFORMATTYPE
+
+const (
+	VideoRVFormatUnused            VideoRVFormat = C.OMX_VIDEO_RVFormatUnused
+	VideoRVFormat8                 VideoRVFormat = C.OMX_VIDEO_RVFormat8
+	VideoRVFormat9                 VideoRVFormat = C.OMX_VIDEO_RVFormat9
+	VideoRVFormatG2                VideoRVFormat = C.OMX_VIDEO_RVFormatG2
+	VideoRVFormatKhronosExtensions VideoRVFormat = C.OMX_VIDEO_RVFormatKhronosExtensions
+	VideoRVFormatVendorStartUnused VideoRVFormat = C.OMX_VIDEO_RVFormatVendorStartUnused
+	VideoRVFormatMax               VideoRVFormat = C.OMX_VIDEO_RVFormatMax
+)
+
+func (v VideoRVFormat) String() string {
+	switch v {
+	case VideoRVFormatUnused:
+		return "VideoRVFormatUnused"
+	case VideoRVFormat8:
+		return "VideoRVFormat8"
+	case VideoRVFormat9:
+		return "VideoRVFormat9"
+	case VideoRVFormatG2:
+		return "VideoRVFormatG2"
+	case VideoRVFormatKhronosExtensions:
+		return "VideoRVFormatKhronosExtensions"
+	case VideoRVFormatVendorStartUnused:
+		return "VideoRVFormatVendorStartUnused"
+	case VideoRVFormatMax:
+		return "VideoRVFormatMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(v))
+}

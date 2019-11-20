@@ -832,7 +832,7 @@ func (c ComponentPort) SetVideoMPEG2(v VideoMPEG2) error {
 	p.eProfile = C.OMX_VIDEO_MPEG2PROFILETYPE(v.Profile)
 	p.eLevel = C.OMX_VIDEO_MPEG2LEVELTYPE(v.Level)
 
-	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoMPEG2, unsafe.Pointer(&p))
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoMpeg2, unsafe.Pointer(&p))
 	if e != C.OMX_ErrorNone {
 		return Error(e)
 	}
@@ -844,7 +844,7 @@ func (c ComponentPort) GetVideoMPEG2() (ret VideoMPEG2, err error) {
 	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
 	p.nPortIndex = C.OMX_U32(c.port)
 
-	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoMPEG2, unsafe.Pointer(&p))
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoMpeg2, unsafe.Pointer(&p))
 	if e != C.OMX_ErrorNone {
 		err = Error(e)
 		return
@@ -854,5 +854,161 @@ func (c ComponentPort) GetVideoMPEG2() (ret VideoMPEG2, err error) {
 	ret.BFrames = uint(p.nBFrames)
 	ret.Profile = VideoMPEG2Profile(p.eProfile)
 	ret.Level = VideoMPEG2Level(p.eLevel)
+	return
+}
+
+type VideoMPEG4 struct {
+	SliceHeaderSpacing  uint
+	SVH                 bool
+	Gov                 bool
+	PFrames             uint
+	BFrames             uint
+	IDCVLCThreshold     uint
+	ACPred              bool
+	MaxPacketSize       uint
+	TimeIncRes          uint
+	Profile             VideoMPEG4Profile
+	Level               VideoMPEG4Level
+	AllowedPictureTypes uint
+	HeaderExtension     uint
+	ReversibleVLC       bool
+}
+
+func (c ComponentPort) SetVideoMPEG4(v VideoMPEG4) error {
+	var p C.OMX_VIDEO_PARAM_MPEG4TYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.nSliceHeaderSpacing = C.OMX_U32(v.SliceHeaderSpacing)
+	p.bSVH = toOMXBool(v.SVH)
+	p.bGov = toOMXBool(v.Gov)
+	p.nPFrames = C.OMX_U32(v.PFrames)
+	p.nBFrames = C.OMX_U32(v.BFrames)
+	p.nIDCVLCThreshold = C.OMX_U32(v.IDCVLCThreshold)
+	p.nTimeIncRes = C.OMX_U32(v.TimeIncRes)
+	p.eProfile = C.OMX_VIDEO_MPEG4PROFILETYPE(v.Profile)
+	p.eLevel = C.OMX_VIDEO_MPEG4LEVELTYPE(v.Level)
+	p.nAllowedPictureTypes = C.OMX_U32(v.AllowedPictureTypes)
+	p.bReversibleVLC = toOMXBool(v.ReversibleVLC)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoMpeg4, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoMPEG4() (ret VideoMPEG4, err error) {
+	var p C.OMX_VIDEO_PARAM_MPEG4TYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoMpeg4, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.SliceHeaderSpacing = uint(p.nSliceHeaderSpacing)
+	ret.SVH = (p.bSVH != C.OMX_FALSE)
+	ret.Gov = (p.bGov != C.OMX_FALSE)
+	ret.PFrames = uint(p.nPFrames)
+	ret.BFrames = uint(p.nBFrames)
+	ret.IDCVLCThreshold = uint(p.nIDCVLCThreshold)
+	ret.TimeIncRes = uint(p.nTimeIncRes)
+	ret.Profile = VideoMPEG4Profile(p.eProfile)
+	ret.Level = VideoMPEG4Level(p.eLevel)
+	ret.AllowedPictureTypes = uint(p.nAllowedPictureTypes)
+	ret.ReversibleVLC = (p.bReversibleVLC != C.OMX_FALSE)
+	return
+}
+
+func (c ComponentPort) SetVideoWMV(v VideoWMVFormat) error {
+	var p C.OMX_VIDEO_PARAM_WMVTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.eFormat = C.OMX_VIDEO_WMVFORMATTYPE(v)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoWmv, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoWMV() (ret VideoWMVFormat, err error) {
+	var p C.OMX_VIDEO_PARAM_WMVTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoWmv, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret = VideoWMVFormat(p.eFormat)
+	return
+}
+
+type VideoRV struct {
+	Format                      VideoRVFormat
+	BitsPerPixel                uint16
+	PaddedWidth                 uint16
+	PaddedHeight                uint16
+	FrameRate                   uint
+	BitstreamFlags              uint
+	BitstreamVersion            uint
+	MaxEncodeFrameSize          uint
+	EnablePostFilter            bool
+	EnableTemporalInterpolation bool
+	EnableLatencyMode           bool
+}
+
+func (c ComponentPort) SetVideoRV(v VideoRV) error {
+	var p C.OMX_VIDEO_PARAM_RVTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.eFormat = C.OMX_VIDEO_RVFORMATTYPE(v.Format)
+	p.nBitsPerPixel = C.OMX_U16(v.BitsPerPixel)
+	p.nPaddedWidth = C.OMX_U16(v.PaddedWidth)
+	p.nPaddedHeight = C.OMX_U16(v.PaddedHeight)
+	p.nFrameRate = C.OMX_U32(v.FrameRate)
+	p.nBitstreamFlags = C.OMX_U32(v.BitstreamFlags)
+	p.nBitstreamVersion = C.OMX_U32(v.BitstreamVersion)
+	p.nMaxEncodeFrameSize = C.OMX_U32(v.MaxEncodeFrameSize)
+	p.bEnablePostFilter = toOMXBool(v.EnablePostFilter)
+	p.bEnableTemporalInterpolation = toOMXBool(v.EnableTemporalInterpolation)
+	p.bEnableLatencyMode = toOMXBool(v.EnableLatencyMode)
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoRv, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) GetVideoRV() (ret VideoRV, err error) {
+	var p C.OMX_VIDEO_PARAM_RVTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoRv, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.Format = VideoRVFormat(p.eFormat)
+	ret.BitsPerPixel = uint16(p.nBitsPerPixel)
+	ret.PaddedWidth = uint16(p.nPaddedWidth)
+	ret.PaddedHeight = uint16(p.nPaddedHeight)
+	ret.FrameRate = uint(p.nFrameRate)
+	ret.BitstreamFlags = uint(p.nBitstreamFlags)
+	ret.BitstreamVersion = uint(p.nBitstreamVersion)
+	ret.MaxEncodeFrameSize = uint(p.nMaxEncodeFrameSize)
+	ret.EnablePostFilter = (p.bEnablePostFilter != C.OMX_FALSE)
+	ret.EnableTemporalInterpolation = (p.bEnableTemporalInterpolation != C.OMX_FALSE)
+	ret.EnableLatencyMode = (p.bEnableLatencyMode != C.OMX_FALSE)
+
 	return
 }
