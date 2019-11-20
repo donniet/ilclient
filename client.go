@@ -482,4 +482,15 @@ func (c ComponentPort) GetVideoQuantization() (VideoQuantization, error) {
 	return ret, nil
 } 
 
+type VideoFastUpdate struct {
+	Enabled bool
+	FirstGOB uint
+	FirstMB uint
+	NumMB uint
+}
+
+func (c ComponentPort) SetVideoFastUpdate(v VideoFastUpdate) error {
+	return nil
+}
+
 
