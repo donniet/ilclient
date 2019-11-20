@@ -530,6 +530,31 @@ func (f ColorFormat) String() string {
 	return fmt.Sprintf("UNKNOWN[%x]", int(f))
 }
 
+type VideoControlRate C.OMX_VIDEO_CONTROLRATETYPE
+const (
+	ControlRateDisable VideoControlRate = C.OMX_Video_ControlRateDisable
+    ControlRateVariable VideoControlRate = C.OMX_Video_ControlRateVariable
+    ControlRateConstant VideoControlRate = C.OMX_Video_ControlRateConstant
+    ControlRateVariableSkipFrames VideoControlRate = C.OMX_Video_ControlRateVariableSkipFrames
+    ControlRateConstantSkipFrames VideoControlRate = C.OMX_Video_ControlRateConstantSkipFrames
+    ControlRateKhronosExtensions VideoControlRate = C.OMX_Video_ControlRateKhronosExtensions
+    ControlRateVendorStartUnused VideoControlRate = C.OMX_Video_ControlRateVendorStartUnused
+    ControlRateMax VideoControlRate = C.OMX_Video_ControlRateMax
+)
+func (c VideoControlRate) String() string {
+	switch c {
+	case ControlRateDisable: return "ControlRateDisable"
+	case ControlRateVariable: return "ControlRateVariable"
+	case ControlRateConstant: return "ControlRateConstant"
+	case ControlRateVariableSkipFrames: return "ControlRateVariableSkipFrames"
+	case ControlRateConstantSkipFrames: return "ControlRateConstantSkipFrames"
+	case ControlRateKhronosExtensions: return "ControlRateKhronosExtensions"
+	case ControlRateVendorStartUnused: return "ControlRateVendorStartUnused"
+	case ControlRateMax: return "ControlRateMax"
+	}
+	return fmt.Sprintf("UNKNOWN[%d]", int(c))
+}
+
 
 
 type Version struct {

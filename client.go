@@ -1,5 +1,16 @@
 package ilclient
 
+
+import (
+	"fmt"
+	"log"
+	"math"
+	"os"
+	"sync"
+	"time"
+	"unsafe"
+)
+
 /*
 #cgo CFLAGS: -Wno-unused-variable -Wall -Wno-deprecated -g -DRASPBERRY_PI -DSTANDALONE -D__STDC_CONSTANT_MACROS  -D__STDC_LIMIT_MACROS -DTARGET_POSIX -D_LINUX -fPIC -DPIC -D_REENTRANT -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -g -DHAVE_LIBOPENMAX=2 -DOMX -DOMX_SKIP64BIT -pipe -DUSE_EXTERNAL_OMX -DHAVE_LIBBCM_HOST -DUSE_EXTERNAL_LIBBCM_HOST -DUSE_VCHIQ_ARM -I/opt/vc/include/IL -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux/ -I./include
 #cgo LDFLAGS: -L/opt/vc/lib -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt
@@ -19,30 +30,13 @@ extern void setup_callbacks(ILCLIENT_T * handle);
 
 extern int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state);
 
-extern OMX_ERRORTYPE set_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-	OMX_IMAGE_CODINGTYPE format, OMX_COLOR_FORMATTYPE color);
-extern OMX_ERRORTYPE get_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-	OMX_IMAGE_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color);
-extern OMX_ERRORTYPE set_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-	OMX_VIDEO_CODINGTYPE format, OMX_COLOR_FORMATTYPE color, OMX_U32 framerate);
-extern OMX_ERRORTYPE get_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-	OMX_VIDEO_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color, OMX_U32 * framerate);
-extern OMX_ERRORTYPE set_video_quantization(COMPONENT_T * comp, unsigned int port, 
-	OMX_U32 nQpI, OMX_U32 nQpP, OMX_U32 nQpB);
-extern OMX_ERRORTYPE get_video_quantization(COMPONENT_T * comp, unsigned int port, 
-    OMX_U32 * nQpI, OMX_U32 * nQpP, OMX_U32 * nQpB);
+extern void initialize_struct(void * p, size_t size);
+extern OMX_ERRORTYPE set_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param);
+extern OMX_ERRORTYPE get_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param);
+
 */
 import "C"
 
-import (
-	"fmt"
-	"log"
-	"math"
-	"os"
-	"sync"
-	"time"
-	"unsafe"
-)
 
 const default_timeout = 0
 
@@ -357,9 +351,15 @@ type ImageFormat struct {
 
 func (c ComponentPort) SetImagePortFormat(formats []ImageFormat) error {
 	for i, f := range formats {
-		e := C.set_image_portformat(c.component.component, C.uint(c.port), C.uint(i),
-			C.OMX_IMAGE_CODINGTYPE(f.Compression), C.OMX_COLOR_FORMATTYPE(f.Color))
+		var p C.OMX_IMAGE_PARAM_PORTFORMATTYPE
+		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+		p.nPortIndex = C.OMX_U32(c.port)
+		p.nIndex = C.OMX_U32(i)
+		p.eCompressionFormat = C.OMX_IMAGE_CODINGTYPE(f.Compression)
+		p.eColorFormat = C.OMX_COLOR_FORMATTYPE(f.Color)
 
+		e := C.set_parameter(c.component.component, C.OMX_IndexParamImagePortFormat, unsafe.Pointer(&p))
+	
 		if e != C.OMX_ErrorNone {
 			return Error(e)
 		}
@@ -372,16 +372,19 @@ func (c ComponentPort) GetImagePortFormat() ([]ImageFormat, error) {
 	var ret []ImageFormat
 	var e C.OMX_ERRORTYPE
 
-	for i := uint(0); true; i++ {
-		var coding C.OMX_IMAGE_CODINGTYPE
-		var color C.OMX_COLOR_FORMATTYPE
+	for i := uint(0); ; i++ {
+		var p C.OMX_IMAGE_PARAM_PORTFORMATTYPE
+		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+		p.nPortIndex = C.OMX_U32(c.port)
+		p.nIndex = C.OMX_U32(i)
 
-		fmt.Fprintf(os.Stderr, "getting image format: %s: %d\n", c.port, int(c.port))
-		e = C.get_image_portformat(c.component.component, C.uint(c.port), C.uint(i),
-			&coding, &color)
+		e = C.get_parameter(c.component.component, C.OMX_IndexParamImagePortFormat, unsafe.Pointer(&p))
 
 		if e == C.OMX_ErrorNone {
-			ret = append(ret, ImageFormat{ImagePortFormat(coding), ColorFormat(color)})
+			ret = append(ret, ImageFormat{
+				ImagePortFormat(p.eCompressionFormat), 
+				ColorFormat(p.eColorFormat),
+			})
 		} else {
 			break
 		}
@@ -408,9 +411,15 @@ type VideoFormat struct {
 
 func (c ComponentPort) SetVideoPortFormat(formats []VideoFormat) error {
 	for i, f := range formats {
-		e := C.set_video_portformat(c.component.component, C.uint(c.port), C.uint(i),
-			C.OMX_VIDEO_CODINGTYPE(f.Compression), C.OMX_COLOR_FORMATTYPE(f.Color), toQ16(f.Framerate))
+		var p C.OMX_VIDEO_PARAM_PORTFORMATTYPE
+		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+		p.nPortIndex = C.OMX_U32(c.port)
+		p.nIndex = C.OMX_U32(i)
+		p.eCompressionFormat = C.OMX_VIDEO_CODINGTYPE(f.Compression)
+		p.eColorFormat = C.OMX_COLOR_FORMATTYPE(f.Color)
+		p.xFramerate = toQ16(f.Framerate)
 
+		e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoPortFormat, unsafe.Pointer(&p))
 		if e != C.OMX_ErrorNone {
 			return Error(e)
 		}
@@ -424,24 +433,23 @@ func (c ComponentPort) GetVideoPortFormat() ([]VideoFormat, error) {
 	var e C.OMX_ERRORTYPE
 
 	for i := uint(0); true; i++ {
-		var coding C.OMX_VIDEO_CODINGTYPE
-		var color C.OMX_COLOR_FORMATTYPE
-		var framerate C.OMX_U32
-
-		e = C.get_video_portformat(c.component.component, C.uint(c.port), C.uint(i),
-			&coding, &color, &framerate)
-
+		var p C.OMX_VIDEO_PARAM_PORTFORMATTYPE
+		C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+		p.nPortIndex = C.OMX_U32(c.port)
+		p.nIndex = C.OMX_U32(i)
+		
+		e = C.get_parameter(c.component.component, C.OMX_IndexParamVideoPortFormat, unsafe.Pointer(&p))
 		if e == C.OMX_ErrorNone {
 			ret = append(ret, VideoFormat{
-				VideoCoding(coding),
-				ColorFormat(color),
-				fromQ16(framerate),
+				VideoCoding(p.eCompressionFormat),
+				ColorFormat(p.eColorFormat),
+				fromQ16(p.xFramerate),
 			})
 		} else {
 			break
 		}
 	}
-	
+
 	if e == C.OMX_ErrorNoMore {
 		return ret, nil
 	}
@@ -455,42 +463,88 @@ type VideoQuantization struct {
 }
 
 func (c ComponentPort) SetVideoQuantization(q VideoQuantization) error {
-	if e := C.set_video_quantization(c.component.component, C.uint(c.port),
-		C.OMX_U32(q.QpI), C.OMX_U32(q.QpP), C.OMX_U32(q.QpB));
-		e != C.OMX_ErrorNone {
+	var p C.OMX_VIDEO_PARAM_QUANTIZATIONTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.nQpI = C.OMX_U32(q.QpI)
+	p.nQpP = C.OMX_U32(q.QpP)
+	p.nQpB = C.OMX_U32(q.QpB)
 
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoQuantization, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
 		return Error(e)
 	}
 	return nil
-} 
+}
 
-func (c ComponentPort) GetVideoQuantization() (VideoQuantization, error) {
-	var nQpI, nQpP, nQpB C.OMX_U32
-
-	ret := VideoQuantization{}
-
-	if e := C.get_video_quantization(c.component.component, C.uint(c.port),
-		&nQpI, &nQpP, &nQpB);
-		e != C.OMX_ErrorNone {
-
+func (c ComponentPort) GetVideoQuantization() (ret VideoQuantization, err error) {
+	var p C.OMX_VIDEO_PARAM_QUANTIZATIONTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoQuantization, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
 		return ret, Error(e)
 	}
-	ret.QpI = uint(nQpI)
-	ret.QpP = uint(nQpP)
-	ret.QpB = uint(nQpB)
+
+	ret.QpI = uint(p.nQpI)
+	ret.QpP = uint(p.nQpP)
+	ret.QpB = uint(p.nQpB)
 
 	return ret, nil
-} 
+}
 
 type VideoFastUpdate struct {
-	Enabled bool
+	Enabled  bool
 	FirstGOB uint
-	FirstMB uint
-	NumMB uint
+	FirstMB  uint
+	NumMB    uint
+}
+
+func toOMXBool(x bool) C.OMX_BOOL {
+	if x {
+		return C.OMX_TRUE
+	}
+	return C.OMX_FALSE
 }
 
 func (c ComponentPort) SetVideoFastUpdate(v VideoFastUpdate) error {
+	var p C.OMX_VIDEO_PARAM_VIDEOFASTUPDATETYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.bEnableVFU = toOMXBool(v.Enabled)
+	p.nFirstGOB = C.OMX_U32(v.FirstGOB)
+	p.nFirstMB = C.OMX_U32(v.FirstMB)
+	p.nNumMBs = C.OMX_U32(v.NumMB)
+	
+	if e := C.set_parameter(c.component.component, C.OMX_IndexParamVideoFastUpdate, unsafe.Pointer(&p)); e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+
 	return nil
 }
 
+func (c ComponentPort) GetVideoFastUpdate() (ret VideoFastUpdate, err error) {
+	var p C.OMX_VIDEO_PARAM_VIDEOFASTUPDATETYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamVideoFastUpdate, unsafe.Pointer(&p))
+
+	if e != C.OMX_ErrorNone {
+		err = Error(e)
+		return
+	}
+
+	ret.Enabled = (p.bEnableVFU != C.OMX_FALSE)
+	ret.FirstGOB = uint(p.nFirstGOB)
+	ret.FirstMB = uint(p.nFirstMB)
+	ret.NumMB = uint(p.nNumMBs)
+	return
+}
+
+type VideoBitrate struct {
+	ControlRate VideoControlRate
+	TargetBitrate uint
+}
 

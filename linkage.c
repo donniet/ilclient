@@ -22,6 +22,29 @@ extern void goEmptyBufferHandler(void * userdata, COMPONENT_T * comp);
     (a).nVersion.s.nRevision = OMX_VERSION_REVISION; \
     (a).nVersion.s.nStep = OMX_VERSION_STEP
 
+typedef struct header_t {
+    OMX_U32 nSize;
+    OMX_VERSIONTYPE nVersion;
+} header;
+
+void initialize_struct(void * p, size_t size) {
+    memset(p, 0, size);
+    header * h = (header*)p;
+    h->nSize = size;
+    h->nVersion.s.nVersionMajor = OMX_VERSION_MAJOR;
+    h->nVersion.s.nVersionMinor = OMX_VERSION_MINOR;
+    h->nVersion.s.nRevision = OMX_VERSION_REVISION;
+    h->nVersion.s.nStep = OMX_VERSION_STEP;
+}
+
+OMX_ERRORTYPE set_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param) {
+    return OMX_SetParameter(ilclient_get_handle(comp), index, param);
+}
+OMX_ERRORTYPE get_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param) {
+    return OMX_GetParameter(ilclient_get_handle(comp), index, param);
+}
+
+
 COMPONENT_T* ilclient_create_component_wrapper(ILCLIENT_T *handle, int * ret, char * name, ILCLIENT_CREATE_FLAGS_T flags) {
 	COMPONENT_T * comp = NULL;
 	fprintf(stderr, "ilclient_create_component\n");
@@ -51,95 +74,3 @@ int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state) {
 	fprintf(stderr, "OMX_GetState\n");
 	return OMX_GetState(ilclient_get_handle(comp), state);
 }
-
-OMX_ERRORTYPE set_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-    OMX_IMAGE_CODINGTYPE format, OMX_COLOR_FORMATTYPE color) 
-{
-    OMX_IMAGE_PARAM_PORTFORMATTYPE param;
-    OMX_INIT_STRUCTURE(param);
-    param.nIndex = index;
-    param.nPortIndex = port;
-    param.eCompressionFormat = format;
-    param.eColorFormat = color;
-
-    return OMX_SetParameter(ilclient_get_handle(comp), OMX_IndexParamImagePortFormat, &param);
-}
-
-OMX_ERRORTYPE get_image_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-	OMX_IMAGE_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color) 
-{
-    OMX_IMAGE_PARAM_PORTFORMATTYPE param;
-    OMX_INIT_STRUCTURE(param);
-    param.nPortIndex = port;
-    param.nIndex = index;
-
-    OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamImagePortFormat, &param);
-    if (e == OMX_ErrorNone) {
-        if (format != NULL) *format = param.eCompressionFormat;
-        if (color != NULL) *color = param.eColorFormat;
-    }
-
-    return e;
-}
-
-OMX_ERRORTYPE set_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-    OMX_VIDEO_CODINGTYPE format, OMX_COLOR_FORMATTYPE color, OMX_U32 framerate) 
-{
-    OMX_VIDEO_PARAM_PORTFORMATTYPE param;
-    OMX_INIT_STRUCTURE(param);
-    param.nIndex = index;
-    param.nPortIndex = port;
-    param.eCompressionFormat = format;
-    param.eColorFormat = color;
-    param.xFramerate = framerate;
-
-    return OMX_SetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoPortFormat, &param);
-}
-
-OMX_ERRORTYPE get_video_portformat(COMPONENT_T * comp, unsigned int port, unsigned int index,
-	OMX_VIDEO_CODINGTYPE * format, OMX_COLOR_FORMATTYPE * color, OMX_U32 * framerate) 
-{
-    OMX_VIDEO_PARAM_PORTFORMATTYPE param;
-    OMX_INIT_STRUCTURE(param);
-    param.nPortIndex = port;
-    param.nIndex = index;
-
-    OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoPortFormat, &param);
-    if (e == OMX_ErrorNone) {
-        if (format != NULL) *format = param.eCompressionFormat;
-        if (color != NULL) *color = param.eColorFormat;
-        if (framerate != NULL) *framerate = param.xFramerate;
-    }
-
-    return e;
-}
-
-OMX_ERRORTYPE set_video_quantization(COMPONENT_T * comp, unsigned int port, 
-    OMX_U32 nQpI, OMX_U32 nQpP, OMX_U32 nQpB) 
-{
-    OMX_VIDEO_PARAM_QUANTIZATIONTYPE param;
-    OMX_INIT_STRUCTURE(param);
-    param.nPortIndex = port;
-    param.nQpI = nQpI;
-    param.nQpP = nQpP;
-    param.nQpB = nQpB;
-
-    return OMX_SetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoQuantization, &param);
-}
-
-OMX_ERRORTYPE get_video_quantization(COMPONENT_T * comp, unsigned int port, 
-    OMX_U32 * nQpI, OMX_U32 * nQpP, OMX_U32 * nQpB) 
-{
-    OMX_VIDEO_PARAM_QUANTIZATIONTYPE param;
-    OMX_INIT_STRUCTURE(param);
-    param.nPortIndex = port;
-
-    OMX_ERRORTYPE e = OMX_GetParameter(ilclient_get_handle(comp), OMX_IndexParamVideoQuantization, &param);
-    if (e == OMX_ErrorNone) {
-        if (nQpI != NULL) *nQpI = param.nQpI;
-        if (nQpP != NULL) *nQpP = param.nQpP;
-        if (nQpB != NULL) *nQpB = param.nQpB;
-    }
-    return e;
-}
-
