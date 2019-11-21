@@ -556,8 +556,9 @@ void ilclient_teardown_tunnels(TUNNEL_T *tunnel)
    i=0;;
    while (tunnel[i].source)
    {
-      fprintf(stderr, "setup tunnel to null: %d", i);
+      fprintf(stderr, "setup tunnel to null: %d\n", i);
       error = OMX_SetupTunnel(tunnel[i].source->comp, tunnel[i].source_port, NULL, 0);
+      fprintf(stderr, "error tearing down tunnel: %x\n", error);
       vc_assert(error == OMX_ErrorNone);
 
       error = OMX_SetupTunnel(tunnel[i].sink->comp, tunnel[i].sink_port, NULL, 0);
