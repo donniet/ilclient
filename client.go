@@ -35,6 +35,9 @@ extern OMX_ERRORTYPE get_parameter(COMPONENT_T * comp, OMX_INDEXTYPE index, void
 extern OMX_ERRORTYPE set_config(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param);
 extern OMX_ERRORTYPE get_config(COMPONENT_T * comp, OMX_INDEXTYPE index, void * param);
 
+int calc_stride(unsigned int width, unsigned int alignment) {
+	 return (width + alignment - 1) & (~(alignment - 1));
+}
 */
 import "C"
 
@@ -92,6 +95,10 @@ func init() {
 	err := C.OMX_Init()
 	fmt.Fprintf(os.Stderr, "ret: %v\n", Error(err))
 
+}
+
+func CalculateStride(width uint, alignment uint) int {
+	return int(C.calc_stride(C.uint(width), c.uint(alignment)))
 }
 
 //export goErrorHandler
