@@ -220,7 +220,7 @@ func (c *Client) Close() {
 }
 
 func (c *Client) handleError(comp *C.COMPONENT_T, data C.OMX_U32) {
-	log.Printf("error: '%s' %v", C.GoString(comp.name), Error(data))
+	log.Printf("error: '%s' %v", C.GoString(&comp.name[0]), Error(data))
 }
 
 func (c *Client) portSettingsChanged(comp *C.COMPONENT_T, data C.OMX_U32) {
