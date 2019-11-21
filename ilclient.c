@@ -556,6 +556,7 @@ void ilclient_teardown_tunnels(TUNNEL_T *tunnel)
    i=0;;
    while (tunnel[i].source)
    {
+      fprintf(stderr, "setup tunnel to null: %d", i);
       error = OMX_SetupTunnel(tunnel[i].source->comp, tunnel[i].source_port, NULL, 0);
       vc_assert(error == OMX_ErrorNone);
 
