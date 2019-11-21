@@ -1911,23 +1911,23 @@ const (
 	IndexParamDynamicParameterConfig           Index = C.OMX_IndexParamDynamicParameterConfig
 
 	// 0x7f000100
-	IndexParamBrcmVideoAVCSPSTimingEnable      Index = C.OMX_IndexParamBrcmVideoAVCSPSTimingEnable
-	IndexParamBrcmBayerOrder                   Index = C.OMX_IndexParamBrcmBayerOrder
-	IndexParamBrcmMaxNumCallbacks              Index = C.OMX_IndexParamBrcmMaxNumCallbacks
-	IndexParamBrcmJpegRestartInterval          Index = C.OMX_IndexParamBrcmJpegRestartInterval
-	IndexParamBrcmSupportsSlices               Index = C.OMX_IndexParamBrcmSupportsSlices
-	IndexParamBrcmIspBlockOverride             Index = C.OMX_IndexParamBrcmIspBlockOverride
-	IndexParamBrcmSupportsUnalignedSliceheight Index = C.OMX_IndexParamBrcmSupportsUnalignedSliceheight
-	IndexParamBrcmLensShadingOverride          Index = C.OMX_IndexParamBrcmLensShadingOverride
-	IndexParamBrcmBlackLevel                   Index = C.OMX_IndexParamBrcmBlackLevel
-	IndexParamOutputShift                      Index = C.OMX_IndexParamOutputShift
-	IndexParamCcmShift                         Index = C.OMX_IndexParamCcmShift
-	IndexParamCustomCcm                        Index = C.OMX_IndexParamCustomCcm
-	IndexConfigCameraAnalogGain                Index = C.OMX_IndexConfigCameraAnalogGain
-	IndexConfigCameraDigitalGain               Index = C.OMX_IndexConfigCameraDigitalGain
-	IndexConfigBrcmDroppableRunLength          Index = C.OMX_IndexConfigBrcmDroppableRunLength
-	IndexParamMinimumAlignment                 Index = C.OMX_IndexParamMinimumAlignment
-	IndexMax                                   Index = C.OMX_IndexMax
+	IndexParamBrcmVideoAVCSPSTimingEnable Index = C.OMX_IndexParamBrcmVideoAVCSPSTimingEnable
+	IndexParamBrcmBayerOrder              Index = C.OMX_IndexParamBrcmBayerOrder
+	IndexParamBrcmMaxNumCallbacks         Index = C.OMX_IndexParamBrcmMaxNumCallbacks
+	IndexParamBrcmJpegRestartInterval     Index = C.OMX_IndexParamBrcmJpegRestartInterval
+	IndexParamBrcmSupportsSlices          Index = C.OMX_IndexParamBrcmSupportsSlices
+	// IndexParamBrcmIspBlockOverride             Index = C.OMX_IndexParamBrcmIspBlockOverride
+	// IndexParamBrcmSupportsUnalignedSliceheight Index = C.OMX_IndexParamBrcmSupportsUnalignedSliceheight
+	// IndexParamBrcmLensShadingOverride          Index = C.OMX_IndexParamBrcmLensShadingOverride
+	// IndexParamBrcmBlackLevel                   Index = C.OMX_IndexParamBrcmBlackLevel
+	// IndexParamOutputShift                      Index = C.OMX_IndexParamOutputShift
+	// IndexParamCcmShift                         Index = C.OMX_IndexParamCcmShift
+	// IndexParamCustomCcm                        Index = C.OMX_IndexParamCustomCcm
+	// IndexConfigCameraAnalogGain                Index = C.OMX_IndexConfigCameraAnalogGain
+	// IndexConfigCameraDigitalGain               Index = C.OMX_IndexConfigCameraDigitalGain
+	// IndexConfigBrcmDroppableRunLength          Index = C.OMX_IndexConfigBrcmDroppableRunLength
+	// IndexParamMinimumAlignment                 Index = C.OMX_IndexParamMinimumAlignment
+	IndexMax Index = C.OMX_IndexMax
 )
 
 func (v Index) String() string {
