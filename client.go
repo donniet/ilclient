@@ -1611,7 +1611,7 @@ func (c ComponentPort) GetPortDefinition() (d PortDefinition, err error) {
 	d.Enabled = (p.bEnabled != C.OMX_FALSE)
 	d.Populated = (p.bPopulated != C.OMX_FALSE)
 	d.Domain = PortDomain(p.eDomain)
-	d.BuffersContiguous = (p.bBufferContiguous != C.OMX_FALSE)
+	d.BuffersContiguous = (p.bBuffersContiguous != C.OMX_FALSE)
 	d.BufferAlignment = uint(p.nBufferAlignment)
 
 	switch d.Domain {
@@ -1690,7 +1690,7 @@ func (c ComponentPort) SetPortDefinition(d PortDefinition) error {
 	p.bEnabled = toOMXBool(d.Enabled)
 	p.bPopulated = toOMXBool(d.Populated)
 	p.eDomain = C.OMX_PORTDOMAINTYPE(d.Domain)
-	p.bBufferContiguous = toOMXBool(d.BuffersContiguous)
+	p.bBuffersContiguous = toOMXBool(d.BuffersContiguous)
 	p.nBufferAlignment = C.OMX_U32(d.BufferAlignment)
 
 	var cleanup func()
