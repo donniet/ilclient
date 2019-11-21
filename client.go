@@ -1676,3 +1676,95 @@ func getVideoPortDefinition(q *C.OMX_PARAM_PORTDEFINITIONTYPE) *VideoPortDefinit
 		Color:            ColorFormat(p.eColorFormat),
 	}
 }
+
+func (c ComponentPort) SetPortDefinition(d PortDefinition) error {
+	var p C.OMX_PARAM_PORTDEFINITIONTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.eDir = C.OMX_DIRTYPE(d.Direction)
+	p.nBufferCountActual = C.OMX_U32(d.BufferCountActual)
+	p.nBufferCountMin = C.OMX_U32(d.BufferCountMin)
+	p.nBufferSize = C.OMX_U32(d.BufferSize)
+	p.bEnabled = toOMXBool(d.Enabled)
+	p.bPopulated = toOMXBool(d.Populated)
+	p.eDomain = C.OMX_PORTDOMAINTYPE(d.Domain)
+
+	var cleanup func()
+
+	if d.Audio != nil {
+		cleanup = setAudioPortDefinition(d.Audio, &p)
+	} else if d.Video != nil {
+		cleanup = setVideoPortDefinition(d.Video, &p)
+	} else if d.Image != nil {
+		cleanup = setImagePortDefinition(d.Image, &p)
+	} else if d.Other != nil {
+		cleanup = setOtherPortDefinition(d.Other, &p)
+	}
+
+	e := C.set_parameter(c.component.component, C.OMX_IndexParamPortDefinition, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+
+	// free any allocated memory
+	if cleanup != nil {
+		cleanup()
+	}
+	return nil
+}
+
+func setAudioPortDefinition(d *AudioPortDefinition, q *C.OMX_PARAM_PORTDEFINITIONTYPE) (cleanup func()) {
+	p := (*C.OMX_AUDIO_PORTDEFINITIONTYPE)(unsafe.Pointer(&q.format[0]))
+
+	p.cMIMEType = C.CString(d.MIMEType)
+	p.bFlagErrorConcealment = toOMXBool(d.ErrorConcealment)
+	p.eEncoding = C.OMX_AUDIO_CODINGTYPE(d.Encoding)
+
+	return func() {
+		C.free(unsafe.Pointer(p.cMIMEType))
+	}
+}
+
+func setVideoPortDefinition(d *VideoPortDefinition, q *C.OMX_PARAM_PORTDEFINITIONTYPE) (cleanup func()) {
+	p := (*C.OMX_VIDEO_PORTDEFINITIONTYPE)(unsafe.Pointer(&q.format[0]))
+
+	p.cMIMEType = C.CString(d.MIMEType)
+	p.nFrameWidth = C.OMX_U32(d.Width)
+	p.nFrameHeight = C.OMX_U32(d.Height)
+	p.nStride = C.OMX_S32(d.Stride)
+	p.nSliceHeight = C.OMX_U32(d.SliceHeight)
+	p.nBitrate = C.OMX_U32(d.Bitrate)
+	p.xFramerate = toQ16(d.Framerate)
+	p.bFlagErrorConcealment = toOMXBool(d.ErrorConcealment)
+	p.eCompressionFormat = C.OMX_VIDEO_CODINGTYPE(d.Compression)
+	p.eColorFormat = C.OMX_COLOR_FORMATTYPE(d.Color)
+
+	return func() {
+		C.free(unsafe.Pointer(p.cMIMEType))
+	}
+}
+
+func setImagePortDefinition(d *ImagePortDefinition, q *C.OMX_PARAM_PORTDEFINITIONTYPE) (cleanup func()) {
+	p := (*C.OMX_IMAGE_PORTDEFINITIONTYPE)(unsafe.Pointer(&q.format[0]))
+
+	p.cMIMEType = C.CString(d.MIMEType)
+	p.nFrameWidth = C.OMX_U32(d.Width)
+	p.nFrameHeight = C.OMX_U32(d.Height)
+	p.nStride = C.OMX_S32(d.Stride)
+	p.nSliceHeight = C.OMX_U32(d.SliceHeight)
+	p.bFlagErrorConcealment = toOMXBool(d.ErrorConcealment)
+	p.eCompressionFormat = C.OMX_IMAGE_CODINGTYPE(d.Compression)
+	p.eColorFormat = C.OMX_COLOR_FORMATTYPE(d.Color)
+
+	return func() {
+		C.free(unsafe.Pointer(p.cMIMEType))
+	}
+}
+
+func setOtherPortDefinition(d *OtherPortDefinition, q *C.OMX_PARAM_PORTDEFINITIONTYPE) (cleanup func()) {
+	p := (*C.OMX_OTHER_PORTDEFINITIONTYPE)(unsafe.Pointer(&q.format[0]))
+
+	p.eFormat = C.OMX_OTHER_FORMATTYPE(d.Format)
+
+	return nil
+}
