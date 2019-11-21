@@ -2808,28 +2808,28 @@ func (v Index) String() string {
 		return "IndexParamBrcmJpegRestartInterval"
 	case IndexParamBrcmSupportsSlices:
 		return "IndexParamBrcmSupportsSlices"
-	case IndexParamBrcmIspBlockOverride:
-		return "IndexParamBrcmIspBlockOverride"
-	case IndexParamBrcmSupportsUnalignedSliceheight:
-		return "IndexParamBrcmSupportsUnalignedSliceheight"
-	case IndexParamBrcmLensShadingOverride:
-		return "IndexParamBrcmLensShadingOverride"
-	case IndexParamBrcmBlackLevel:
-		return "IndexParamBrcmBlackLevel"
-	case IndexParamOutputShift:
-		return "IndexParamOutputShift"
-	case IndexParamCcmShift:
-		return "IndexParamCcmShift"
-	case IndexParamCustomCcm:
-		return "IndexParamCustomCcm"
-	case IndexConfigCameraAnalogGain:
-		return "IndexConfigCameraAnalogGain"
-	case IndexConfigCameraDigitalGain:
-		return "IndexConfigCameraDigitalGain"
-	case IndexConfigBrcmDroppableRunLength:
-		return "IndexConfigBrcmDroppableRunLength"
-	case IndexParamMinimumAlignment:
-		return "IndexParamMinimumAlignment"
+	// case IndexParamBrcmIspBlockOverride:
+	// 	return "IndexParamBrcmIspBlockOverride"
+	// case IndexParamBrcmSupportsUnalignedSliceheight:
+	// 	return "IndexParamBrcmSupportsUnalignedSliceheight"
+	// case IndexParamBrcmLensShadingOverride:
+	// 	return "IndexParamBrcmLensShadingOverride"
+	// case IndexParamBrcmBlackLevel:
+	// 	return "IndexParamBrcmBlackLevel"
+	// case IndexParamOutputShift:
+	// 	return "IndexParamOutputShift"
+	// case IndexParamCcmShift:
+	// 	return "IndexParamCcmShift"
+	// case IndexParamCustomCcm:
+	// 	return "IndexParamCustomCcm"
+	// case IndexConfigCameraAnalogGain:
+	// 	return "IndexConfigCameraAnalogGain"
+	// case IndexConfigCameraDigitalGain:
+	// 	return "IndexConfigCameraDigitalGain"
+	// case IndexConfigBrcmDroppableRunLength:
+	// 	return "IndexConfigBrcmDroppableRunLength"
+	// case IndexParamMinimumAlignment:
+	// 	return "IndexParamMinimumAlignment"
 	case IndexMax:
 		return "IndexMax"
 	}
