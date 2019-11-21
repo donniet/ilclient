@@ -1248,7 +1248,7 @@ const (
 	FaceDetectionControlMax               FaceDetectionControlMode = C.OMX_FaceDetectionControlMax
 )
 
-func (v FaceDetectionControl) String() string {
+func (v FaceDetectionControlMode) String() string {
 	switch v {
 	case FaceDetectionControlNone:
 		return "FaceDetectionControlNone"
@@ -2610,8 +2610,8 @@ func (v Index) String() string {
 		return "IndexConfigPortCapturing"
 	case IndexConfigBrcmDecoderPassThrough:
 		return "IndexConfigBrcmDecoderPassThrough"
-	case IndexParamBrcmDecoderPassThrough:
-		return "IndexParamBrcmDecoderPassThrough"
+	// case IndexParamBrcmDecoderPassThrough:
+	// 	return "IndexParamBrcmDecoderPassThrough"
 	case IndexParamBrcmMaxCorruptMBs:
 		return "IndexParamBrcmMaxCorruptMBs"
 	case IndexConfigBrcmGlobalAudioMute:

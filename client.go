@@ -1542,8 +1542,8 @@ func (c *Component) SetCameraDeviceNumber(n uint) error {
 type AudioPortDefinition struct {
 	MIMEType string
 	// NativeRender unsafe.Pointer
-	FlagErrorConcealment bool
-	Encoding             AudioCoding
+	ErrorConcealment bool
+	Encoding         AudioCoding
 }
 
 type VideoPortDefinition struct {
@@ -1614,40 +1614,65 @@ func (c ComponentPort) GetPortDefinition() (d PortDefinition, err error) {
 
 	switch d.Domain {
 	case PortDomainAudio:
-		d.Audio = &AudioPortDefinition{
-			MIMEType:         C.GoString(p.format.audio.cMIMEType),
-			ErrorConcealment: (p.format.audio.bFlagErrorConcealment != C.OMX_FALSE),
-			Encoding:         AudioCoding(p.format.audio.eEncoding),
-		}
+		// cast pointer to union
+		d.Audio = getAudioPortDefinition(&p)
 	case PortDomainImage:
-		d.Image = &ImagePortDefinition{
-			MIMEType:         C.GoString(p.format.image.cMIMEType),
-			Width:            uint(p.format.image.nFrameWidth),
-			Height:           uint(p.format.image.nFrameHeight),
-			Stride:           int(p.format.image.nStride),
-			SliceHeight:      uint(p.format.image.nSliceHeight),
-			ErrorConcealment: (p.format.image.bFlagErrorConcealment != C.OMX_FALSE),
-			Compression:      ImageCoding(p.format.image.eCompressionFormat),
-			Color:            ColorFormat(p.format.image.eColorFormat),
-		}
+		d.Image = getImagePortDefinition(&p)
 	case PortDomainOther:
-		d.Other = &OtherPortDefinition{
-			Format: OtherFormat(p.format.other.eFormat),
-		}
+		d.Other = getOtherPortDefinition(&p)
 	case PortDomainVideo:
-		d.Video = &VideoPortDefinition{
-			MIMEType:         C.GoString(p.format.video.cMIMEType),
-			Width:            uint(p.format.video.nFrameWidth),
-			Height:           uint(p.format.video.nFrameHeight),
-			Stride:           int(p.format.video.nStride),
-			SliceHeight:      uint(p.format.video.nSliceHeight),
-			Bitrate:          uint(p.format.video.nBitrate),
-			Framerate:        fromQ16(p.format.video.xFramerate),
-			ErrorConcealment: (p.format.video.bFlagErrorConcealment != C.OMX_FALSE),
-			Compression:      VideoCoding(p.format.video.eCompressionFormat),
-			Color:            ColorFormat(p.format.video.eColorFormat),
-		}
+		d.Video = getVideoPortDefinition(&p)
 	}
 
 	return
+}
+
+func getAudioPortDefinition(q *C.OMX_PARAM_PORTDEFINITIONTYPE) *AudioPortDefinition {
+	p := (*C.OMX_AUDIO_PORTDEFINITIONTYPE)(unsafe.Pointer(&q.format[0]))
+
+	return &AudioPortDefinition{
+		MIMEType:         C.GoString(p.cMIMEType),
+		ErrorConcealment: (p.bFlagErrorConcealment != C.OMX_FALSE),
+		Encoding:         AudioCoding(p.eEncoding),
+	}
+}
+
+func getImagePortDefinition(q *C.OMX_PARAM_PORTDEFINITIONTYPE) *ImagePortDefinition {
+	p := (*C.OMX_IMAGE_PORTDEFINITIONTYPE)(unsafe.Pointer(&q.format[0]))
+
+	return &ImagePortDefinition{
+		MIMEType:         C.GoString(p.cMIMEType),
+		Width:            uint(p.nFrameWidth),
+		Height:           uint(p.nFrameHeight),
+		Stride:           int(p.nStride),
+		SliceHeight:      uint(p.nSliceHeight),
+		ErrorConcealment: (p.bFlagErrorConcealment != C.OMX_FALSE),
+		Compression:      ImageCoding(p.eCompressionFormat),
+		Color:            ColorFormat(p.eColorFormat),
+	}
+}
+
+func getOtherPortDefinition(q *C.OMX_PARAM_PORTDEFINITIONTYPE) *OtherPortDefinition {
+	p := (*C.OMX_OTHER_PORTDEFINITIONTYPE)(unsafe.Pointer(&q.format[0]))
+
+	return &OtherPortDefinition{
+		Format: OtherFormat(p.eFormat),
+	}
+}
+
+func getVideoPortDefinition(q *C.OMX_PARAM_PORTDEFINITIONTYPE) *VideoPortDefinition {
+	p := (*C.OMX_VIDEO_PORTDEFINITIONTYPE)(unsafe.Pointer(&q.format[0]))
+
+	return &VideoPortDefinition{
+		MIMEType:         C.GoString(p.cMIMEType),
+		Width:            uint(p.nFrameWidth),
+		Height:           uint(p.nFrameHeight),
+		Stride:           int(p.nStride),
+		SliceHeight:      uint(p.nSliceHeight),
+		Bitrate:          uint(p.nBitrate),
+		Framerate:        fromQ16(p.xFramerate),
+		ErrorConcealment: (p.bFlagErrorConcealment != C.OMX_FALSE),
+		Compression:      VideoCoding(p.eCompressionFormat),
+		Color:            ColorFormat(p.eColorFormat),
+	}
 }
