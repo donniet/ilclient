@@ -345,7 +345,7 @@ func (t *Tunnel) Flush() {
 }
 
 type ImageFormat struct {
-	Compression ImagePortFormat
+	Compression ImageCoding
 	Color       ColorFormat
 }
 
@@ -382,7 +382,7 @@ func (c ComponentPort) GetImagePortFormat() ([]ImageFormat, error) {
 
 		if e == C.OMX_ErrorNone {
 			ret = append(ret, ImageFormat{
-				ImagePortFormat(p.eCompressionFormat),
+				ImageCoding(p.eCompressionFormat),
 				ColorFormat(p.eColorFormat),
 			})
 		} else {
@@ -1403,5 +1403,251 @@ func (c ComponentPort) MacroBlockErrorMap() (m MacroBlockErrorMap, err error) {
 
 	m.MapSize = uint(p.nErrMapSize)
 	m.Hint[0] = uint8(p.ErrMap[0])
+	return
+}
+
+func (c ComponentPort) SetMacroBlockErrorReporting(m bool) error {
+	var p C.OMX_CONFIG_MBERRORREPORTINGTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+	p.bEnabled = toOMXBool(m)
+
+	e := C.set_config(c.component.component, C.OMX_IndexConfigVideoMBErrorReporting, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c ComponentPort) MacroBlockErrorReporting() (m bool, err error) {
+	var p C.OMX_CONFIG_MBERRORREPORTINGTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_config(c.component.component, C.OMX_IndexConfigVideoMBErrorReporting, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return m, Error(e)
+	}
+
+	m = (p.bEnabled != C.OMX_FALSE)
+	return
+}
+
+// type FaceDetectionControl struct {
+// 	Mode       FaceDetectionControlMode
+// 	Frames     uint
+// 	MaxRegions uint
+// 	Quality    uint
+// }
+
+// func (c ComponentPort) SetFaceDetectionControl(m FaceDetectionControl) error {
+// 	var p C.OMX_CONFIG_FACEDETECTIONCONTROLTYPE
+// 	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+// 	p.nPortIndex = C.OMX_U32(c.port)
+// 	p.eMode = C.OMX_FACEDETECTIONCONTROLTYPE(m.Mode)
+// 	p.nMaxRegions = C.OMX_U32(m.MaxRegions)
+// 	p.nQuality = C.OMX_U32(m.Quality)
+
+// 	e := C.set_config(c.component.component, C.OMX_IndexConfigCommonFaceDetectionControl, unsafe.Pointer(&p))
+// 	if e != C.OMX_ErrorNone {
+// 		return Error(e)
+// 	}
+// 	return nil
+// }
+
+// func (c ComponentPort) FaceDetectionControl() (m FaceDetectionControl, err error) {
+// 	var p C.OMX_CONFIG_FACEDETECTIONCONTROLTYPE
+// 	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+// 	p.nPortIndex = C.OMX_U32(c.port)
+
+// 	e := C.get_config(c.component.component, C.OMX_IndexConfigCommonFaceDetectionControl, unsafe.Pointer(&p))
+// 	if e != C.OMX_ErrorNone {
+// 		return m, Error(e)
+// 	}
+
+// 	m.Mode = FaceDetectionControlMode(p.eMode)
+// 	m.Frames = uint(p.nFrames)
+// 	m.MaxRegions = uint(p.nMaxRegions)
+// 	m.Quality = uint(p.nQuality)
+// 	return
+// }
+
+// type FaceRegion struct {
+// 	Left   int16
+// 	Top    int16
+// 	Width  uint16
+// 	Height uint16
+// 	Flags  FaceRegionFlags
+// }
+
+// func (c ComponentPort) SetFaceRegion(m FaceRegion) error {
+// 	var p C.OMX_FACEREGIONTYPE
+// 	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+// 	p.nPortIndex = C.OMX_U32(c.port)
+// 	p.eMode = C.OMX_FaceRegionTYPE(m.Mode)
+// 	p.nMaxRegions = C.OMX_U32(m.MaxRegions)
+// 	p.nQuality = C.OMX_U32(m.Quality)
+
+// 	e := C.set_config(c.component.component, C.OMX_IndexConfigCommonFaceRegion, unsafe.Pointer(&p))
+// 	if e != C.OMX_ErrorNone {
+// 		return Error(e)
+// 	}
+// 	return nil
+// }
+
+// func (c ComponentPort) FaceRegion() (m FaceRegion, err error) {
+// 	var p C.OMX_FACEREGIONTYPE
+// 	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+// 	p.nPortIndex = C.OMX_U32(c.port)
+
+// 	e := C.get_config(c.component.component, C.OMX_IndexConfigCommonFaceRegion, unsafe.Pointer(&p))
+// 	if e != C.OMX_ErrorNone {
+// 		return m, Error(e)
+// 	}
+
+// 	m.Mode = FaceRegionMode(p.eMode)
+// 	m.Frames = uint(p.nFrames)
+// 	m.MaxRegions = uint(p.nMaxRegions)
+// 	m.Quality = uint(p.nQuality)
+// 	return
+// }
+
+func (c *Component) RequestCallback(index Index, enable bool) error {
+	var p C.OMX_CONFIG_REQUESTCALLBACKTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_ALL
+	p.nIndex = C.OMX_INDEXTYPE(index)
+	p.bEnable = toOMXBool(enable)
+
+	e := C.set_config(c.component, C.OMX_IndexConfigRequestCallback, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+func (c *Component) SetCameraDeviceNumber(n uint) error {
+	var p C.OMX_PARAM_U32TYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_ALL
+	p.nU32 = C.OMX_U32(n)
+
+	e := C.set_parameter(c.component, C.OMX_IndexParamCameraDeviceNumber, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return Error(e)
+	}
+	return nil
+}
+
+type AudioPortDefinition struct {
+	MIMEType string
+	// NativeRender unsafe.Pointer
+	FlagErrorConcealment bool
+	Encoding             AudioCoding
+}
+
+type VideoPortDefinition struct {
+	MIMEType string
+	// NativeRender unsafe.Pointer
+	Width            uint
+	Height           uint
+	Stride           int
+	SliceHeight      uint
+	Bitrate          uint
+	Framerate        float64
+	ErrorConcealment bool
+	Compression      VideoCoding
+	Color            ColorFormat
+	// NativeWindow unsafe.Pointer
+}
+
+type ImagePortDefinition struct {
+	MIMEType string
+	// NativeRender unsafe.Pointer
+	Width            uint
+	Height           uint
+	Stride           int
+	SliceHeight      uint
+	ErrorConcealment bool
+	Compression      ImageCoding
+	Color            ColorFormat
+	// NativeWindow unsafe.Pointer
+}
+
+type OtherPortDefinition struct {
+	Format OtherFormat
+}
+
+type PortDefinition struct {
+	Direction         Direction
+	BufferCountActual uint
+	BufferCountMin    uint
+	BufferSize        uint
+	Enabled           bool
+	Populated         bool
+	Domain            PortDomain
+	BuffersContiguous bool
+	BufferAlignment   uint
+	Audio             *AudioPortDefinition
+	Video             *VideoPortDefinition
+	Image             *ImagePortDefinition
+	Other             *OtherPortDefinition
+}
+
+func (c ComponentPort) GetPortDefinition() (d PortDefinition, err error) {
+	var p C.OMX_PARAM_PORTDEFINITIONTYPE
+	C.initialize_struct(unsafe.Pointer(&p), C.uint(unsafe.Sizeof(p)))
+	p.nPortIndex = C.OMX_U32(c.port)
+
+	e := C.get_parameter(c.component.component, C.OMX_IndexParamPortDefinition, unsafe.Pointer(&p))
+	if e != C.OMX_ErrorNone {
+		return d, Error(e)
+	}
+
+	d.Direction = Direction(p.eDir)
+	d.BufferCountActual = uint(p.nBufferCountActual)
+	d.BufferCountMin = uint(p.nBufferCountMin)
+	d.BufferSize = uint(p.nBufferSize)
+	d.Enabled = (p.bEnabled != C.OMX_FALSE)
+	d.Populated = (p.bPopulated != C.OMX_FALSE)
+	d.Domain = PortDomain(p.eDomain)
+
+	switch d.Domain {
+	case PortDomainAudio:
+		d.Audio = &AudioPortDefinition{
+			MIMEType:         C.GoString(p.format.audio.cMIMEType),
+			ErrorConcealment: (p.format.audio.bFlagErrorConcealment != C.OMX_FALSE),
+			Encoding:         AudioCoding(p.format.audio.eEncoding),
+		}
+	case PortDomainImage:
+		d.Image = &ImagePortDefinition{
+			MIMEType:         C.GoString(p.format.image.cMIMEType),
+			Width:            uint(p.format.image.nFrameWidth),
+			Height:           uint(p.format.image.nFrameHeight),
+			Stride:           int(p.format.image.nStride),
+			SliceHeight:      uint(p.format.image.nSliceHeight),
+			ErrorConcealment: (p.format.image.bFlagErrorConcealment != C.OMX_FALSE),
+			Compression:      ImageCoding(p.format.image.eCompressionFormat),
+			Color:            ColorFormat(p.format.image.eColorFormat),
+		}
+	case PortDomainOther:
+		d.Other = &OtherPortDefinition{
+			Format: OtherFormat(p.format.other.eFormat),
+		}
+	case PortDomainVideo:
+		d.Video = &VideoPortDefinition{
+			MIMEType:         C.GoString(p.format.video.cMIMEType),
+			Width:            uint(p.format.video.nFrameWidth),
+			Height:           uint(p.format.video.nFrameHeight),
+			Stride:           int(p.format.video.nStride),
+			SliceHeight:      uint(p.format.video.nSliceHeight),
+			Bitrate:          uint(p.format.video.nBitrate),
+			Framerate:        fromQ16(p.format.video.xFramerate),
+			ErrorConcealment: (p.format.video.bFlagErrorConcealment != C.OMX_FALSE),
+			Compression:      VideoCoding(p.format.video.eCompressionFormat),
+			Color:            ColorFormat(p.format.video.eColorFormat),
+		}
+	}
+
 	return
 }

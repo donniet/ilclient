@@ -1,0 +1,14 @@
+#0  0x76f17a40 in do_futex_wait (isem=isem@entry=0x76f61394 <vcos_thread_main+12>) at ../nptl/sysdeps/unix/sysv/linux/sem_wait.c:48
+#1  0x76f17af4 in __new_sem_wait (sem=sem@entry=0x76f61394 <vcos_thread_main+12>) at ../nptl/sysdeps/unix/sysv/linux/sem_wait.c:69
+#2  0x76f4bda4 in vcos_semaphore_wait (sem=0x76f61394 <vcos_thread_main+12>)
+    at /home/dc4/projects/staging/userland/interface/vcos/pthreads/vcos_platform.h:254
+#3  _vcos_thread_sem_wait () at /home/dc4/projects/staging/userland/interface/vcos/pthreads/vcos_platform.h:646
+#4  vcos_generic_event_flags_get (flags=0x14c788, bitmask=144, op=5, suspend=4294967295, retrieved_bits=0x7efff2cc)
+    at /home/dc4/projects/staging/userland/interface/vcos/generic/vcos_generic_event_flags.c:223
+#5  0x0009da4c in vcos_event_flags_get (flags=0x14c788, requested_events=144, op=5, suspend=4294967295, retrieved_events=0x7efff2cc)
+    at /opt/vc/include/interface/vcos/generic/vcos_generic_event_flags.h:118
+#6  0x000a0d0c in ilclient_wait_for_command_complete_dual (comp=0x14c770, command=OMX_CommandStateSet, nData2=2, other=0x0) at ilclient.c:1252
+#7  0x000a0d68 in ilclient_wait_for_command_complete (comp=0x14c770, command=OMX_CommandStateSet, nData2=2) at ilclient.c:1271
+#8  0x0009f884 in ilclient_change_component_state (comp=0x14c770, state=OMX_StateIdle) at ilclient.c:748
+#9  0x0009cc44 in _cgo_6f780c0e40ad_Cfunc_ilclient_change_component_state (v=0x10449ee8) at cgo-gcc-prolog:87
+#10 0x00060848 in runtime.asmcgocall () at /usr/local/go/src/runtime/asm_arm.s:612
