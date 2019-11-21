@@ -80,3 +80,7 @@ int get_component_state(COMPONENT_T * comp, OMX_STATETYPE * state) {
 	fprintf(stderr, "OMX_GetState\n");
 	return OMX_GetState(ilclient_get_handle(comp), state);
 }
+
+int calc_stride(unsigned int width, unsigned int alignment) {
+	 return (width + alignment - 1) & (~(alignment - 1));
+}
